@@ -9,10 +9,11 @@ name = "users"
 	http_verb = "Get"
 	query_param = {name = "user_id", field_type = "String"}
 	success_code = 200
+	return_model = """
+	struct UserResponse {
+		name: String,
+		age: u16,
+		email: String,
+	}
+	"""
 
-# # outline the schema of the returned data
-# # TODO: make this easier to re-use
-# return_model.name = "string"
-# return_model.username = "string"
-# return_model.age = "u16" # rust-based primitives accepted
-# return_model.user_id = "UUID4"

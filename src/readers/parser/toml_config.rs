@@ -26,6 +26,20 @@ pub struct WebAPI {
     groups: Vec<EndpointGroup>,
 }
 
+/// Basic methods for the top-level struct. Basically all operations done by other classes
+/// (minus `writer`) should be done though this interface instead of the member fields.
+impl WebAPI {
+    /// Top-level function to return the raw data as a parsed and valid
+    /// `struct` as defined by the `WebAPI struct` itself.
+    ///
+    /// *NOTE*: the `toml::from_str` here is unwrapped, meaning that the
+    /// error messages passed are not really that great or legible.
+    pub fn parse_toml(toml_str: &String) -> WebAPI {
+        let parsed_toml: WebAPI = toml::from_str(toml_str).unwrap();
+        parsed_toml
+    }
+}
+
 /// Holds the data for grouped endpoints working with the same logic.
 ///
 /// i.e. all of the calls that handle user data should be placed in a single
@@ -53,7 +67,9 @@ struct Endpoint {
     route: String,
     http_verb: HTTPVerbs,
     query_param: Option<QueryParam>,
+    // TODO: eventually this success code needs to be validated and wrapped in a StatusCode enum.
     success_code: u16,
+    return_model: String,
 }
 
 /// Made for requests (`GET`s) that need to take in a URL query string parameter.
@@ -87,18 +103,4 @@ enum HTTPVerbs {
     Post,
     Delete,
     Update,
-}
-
-/// Basic methods for the top-level struct. Basically all operations done by other classes
-/// (minus `writer`) should be done though this interface instead of the member fields.
-impl WebAPI {
-    /// Top-level function to return the raw data as a parsed and valid
-    /// `struct` as defined by the `WebAPI struct` itself.
-    ///
-    /// *NOTE*: the `toml::from_str` here is unwrapped, meaning that the
-    /// error messages passed are not really that great or legible.
-    pub fn parse_toml(toml_str: &String) -> WebAPI {
-        let parsed_toml: WebAPI = toml::from_str(toml_str).unwrap();
-        parsed_toml
-    }
 }
