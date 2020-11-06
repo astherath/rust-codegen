@@ -1,10 +1,13 @@
 title = "API Title"
 version = "V0.1"
 
-# [users]
+[[groups]]
+name = "users"
 
-# [users.get]
-# route = "/users/find"
+	[[groups.endpoints]]
+	route = "/find"
+	http_verb = "Get"
+
 # query_param.name = "user_id"
 # query_param.type = "UUID4"
 
