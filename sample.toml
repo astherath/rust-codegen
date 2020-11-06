@@ -1,16 +1,16 @@
 title = "API Title"
 version = "V0.1"
 
-[users]
+# [users]
 
-[users.get]
-route = "/users/find"
-query_param.name = "user_id"
-query_param.type = "UUID4"
+# [users.get]
+# route = "/users/find"
+# query_param.name = "user_id"
+# query_param.type = "UUID4"
 
-# outline the schema of the returned data
-# TODO: make this easier to re-use
-return_model.name = "string"
-return_model.username = "string"
-return_model.age = "u16" # rust-based primitives accepted
-return_model.user_id = "UUID4"
+# # outline the schema of the returned data
+# # TODO: make this easier to re-use
+# return_model.name = "string"
+# return_model.username = "string"
+# return_model.age = "u16" # rust-based primitives accepted
+# return_model.user_id = "UUID4"
