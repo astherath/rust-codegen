@@ -3,6 +3,8 @@
 //! the `assembler` module.
 
 use serde_derive::Deserialize;
+// use hyper::StatusCode;
+// use toml_config;
 use std::fs;
 use toml;
 
@@ -67,6 +69,23 @@ struct EndpointGroup {
 struct Endpoint {
     route: String,
     http_verb: HTTPVerbs,
+    query_param: Option<QueryParam>,
+    success_code: u16,
+}
+
+#[derive(Deserialize, Debug)]
+struct QueryParam {
+    name: String,
+    field_type: UnitTypes,
+}
+
+#[derive(Deserialize, Debug)]
+enum UnitTypes {
+    String,
+    U32,
+    I32,
+    U16,
+    I16,
 }
 
 /// Very basic (and probably bad) implementation of the few accepted HTTP Verbs.

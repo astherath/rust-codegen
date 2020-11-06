@@ -7,9 +7,8 @@ name = "users"
 	[[groups.endpoints]]
 	route = "/find"
 	http_verb = "Get"
-
-# query_param.name = "user_id"
-# query_param.type = "UUID4"
+	query_param = {name = "user_id", field_type = "String"}
+	success_code = 200
 
 # # outline the schema of the returned data
 # # TODO: make this easier to re-use
