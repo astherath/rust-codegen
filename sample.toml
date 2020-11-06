@@ -9,11 +9,9 @@ name = "users"
 	http_verb = "Get"
 	query_param = {name = "user_id", field_type = "String"}
 	success_code = 200
-	return_model = """
+	return_model = """\
 	struct UserResponse {
 		name: String,
 		age: u16,
 		email: String,
-	}
-	"""
-
+	}"""
