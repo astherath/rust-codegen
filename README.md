@@ -2,7 +2,7 @@
 
 ## Project Goals (Priority List)
 
-1. Read a user-created config/schema file (toml/json) and automatically generate API endpoints using the `artix` web framework
+1. Read a user-created config/schema file (toml/json) and automatically generate API endpoints using the `actix` web framework
 
 2. Generated code should be completely bug free (by design)
 
