@@ -1,3 +1,13 @@
+//! ## TOML specific parser and validator
+//! Uses the `toml` library to parse a string of file data into a
+//! rust `struct`.
+//!
+//! Modifications to the main/sub structs result in direct changes to the parser,
+//! and should only be done very deliberately.
+//!
+//! ### NOTE:
+//! - All of the enums and structs used to parse *must* implement the `serde::Deserialize` trait.
+
 use hyper::StatusCode;
 use serde_derive::Deserialize;
 use toml;
@@ -17,6 +27,13 @@ pub struct WebAPI {
 }
 
 /// Holds the data for grouped endpoints working with the same logic.
+///
+/// i.e. all of the calls that handle user data should be placed in a single
+/// `EndpointGroup` struct (`groups` in TOML).
+///
+/// Most of the useful data is in the `endpoints` field, as those are the most
+/// granular and mapable struct types.
+///
 /// Mainly exists to conform easily to TOML structure.
 #[derive(Deserialize, Debug)]
 struct EndpointGroup {
@@ -25,7 +42,12 @@ struct EndpointGroup {
 }
 
 /// Single-endpoint struct. Holds info such as type, route, input data, etc.
-/// A single WebAPI is composed of many `Endpoint` instances.
+///
+/// A single WebAPI is composed of many of these `Endpoint` instances nested within
+/// a `EndpointGroup` struct.
+///
+/// This is the single struct that should have the most meaningful data specific to a single
+/// transaction in the API as a whole.
 #[derive(Deserialize, Debug)]
 struct Endpoint {
     route: String,
@@ -34,12 +56,17 @@ struct Endpoint {
     success_code: u16,
 }
 
+/// Made for requests (`GET`s) that need to take in a URL query string parameter.
+///
+/// The `field_type` is a non-exhaustive enum of valid data types which are to be
+/// used later in conjunction with the `writer` mod.
 #[derive(Deserialize, Debug)]
 struct QueryParam {
     name: String,
     field_type: UnitTypes,
 }
 
+/// Very small (and frankly hacky) list of accepted data types (think primitives but worse).
 #[derive(Deserialize, Debug)]
 enum UnitTypes {
     String,
@@ -49,8 +76,11 @@ enum UnitTypes {
     I16,
 }
 
+// TODO: replace this with a `std` lib enum of http verbs.
 /// Very basic (and probably bad) implementation of the few accepted HTTP Verbs.
-/// TODO: replace this with a `std` lib enum of http verbs.
+///
+/// Eventually these will require their own valid implementation for use with
+/// the `writer` mod.
 #[derive(Deserialize, Debug)]
 enum HTTPVerbs {
     Get,
@@ -59,8 +89,14 @@ enum HTTPVerbs {
     Update,
 }
 
+/// Basic methods for the top-level struct. Basically all operations done by other classes
+/// (minus `writer`) should be done though this interface instead of the member fields.
 impl WebAPI {
-    /// Top-level function to return the data within the config struct.
+    /// Top-level function to return the raw data as a parsed and valid
+    /// `struct` as defined by the `WebAPI struct` itself.
+    ///
+    /// *NOTE*: the `toml::from_str` here is unwrapped, meaning that the
+    /// error messages passed are not really that great or legible.
     pub fn parse_toml(toml_str: &String) -> WebAPI {
         let parsed_toml: WebAPI = toml::from_str(toml_str).unwrap();
         parsed_toml
