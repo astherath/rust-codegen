@@ -32,10 +32,15 @@ impl InputFileReader {
         let toml_data = TomlConfig::parse_toml(&file_data);
         InputFileReader { toml_data }
     }
+
+    /// Very temporary function to smoke check the incoming data by printing it out
+    pub fn pretty_print_data(&self) {
+        println!("{:#?}", self.toml_data);
+    }
 }
 
 /// Serves as a facade for all of the `toml` reading/parsing.
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 struct TomlConfig {
     title: String,
     version: String,
