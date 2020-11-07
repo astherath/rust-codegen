@@ -20,7 +20,7 @@ fn read_file_data(filename: &String) -> String {
 /// Also performs minimal sanitization, but mainly acts as the first
 /// barrier of safety for bad data (TOML validation performed at this step).
 pub struct InputFileReader {
-    toml_data: WebAPI,
+    pub toml_data: WebAPI,
 }
 
 impl InputFileReader {
