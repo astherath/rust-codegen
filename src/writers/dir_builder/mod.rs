@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 ///
 /// Should succeed at creating the entirety of the directory tree needed.
 pub fn build(base_path_str: String) -> Result<()> {
-    let directory_builder = DirectoryBuilder::new(base_path_str);
+    let mut directory_builder = DirectoryBuilder::new(base_path_str);
     directory_builder.create_base_dir()?;
 
     // assemble vec of sub-dirs
@@ -19,7 +19,8 @@ pub fn build(base_path_str: String) -> Result<()> {
     }
 
     // make the sub-dirs
-    directory_builder.create_sub_directories(sub_dirs)?;
+    directory_builder.create_sub_directories(&sub_dirs)?;
+
     Ok(())
 }
 
@@ -45,7 +46,8 @@ impl SubDir {
 /// extendable by design.
 pub struct DirectoryBuilder {
     dir_builder: DirBuilder,
-    base_dir: PathBuf,
+    pub base_dir: PathBuf,
+    pub sub_dirs: Vec<String>,
 }
 
 impl DirectoryBuilder {
@@ -54,9 +56,11 @@ impl DirectoryBuilder {
     pub fn new(output_dir_str: String) -> DirectoryBuilder {
         let dir_builder = DirBuilder::new();
         let base_dir = PathBuf::from(output_dir_str);
+        let sub_dirs = Vec::new();
         DirectoryBuilder {
             dir_builder,
             base_dir,
+            sub_dirs,
         }
     }
 
@@ -74,15 +78,25 @@ impl DirectoryBuilder {
         Ok(())
     }
 
+    /// Small (and ugly) helper function for
+    /// pushing a subdir to the DirectoryBuilder
+    fn add_sub_dir(&mut self, sub_dir: &PathBuf) {
+        self.sub_dirs.push(sub_dir.to_str().unwrap().to_string());
+    }
+
     /// Creates all of the sub-directories within the `base_dir`.
     ///
     /// Works off of a vector of `SubDir` structs, so adding/removing
     /// subdirs to the overall file hierarchy isn't a nightmare.
-    fn create_sub_directories(&self, sub_dirs: Vec<SubDir>) -> Result<()> {
+    fn create_sub_directories(&mut self, sub_dirs: &Vec<SubDir>) -> Result<()> {
         let mut full_dir = self.base_dir.clone();
-        for sub_dir in &sub_dirs {
+        for sub_dir in sub_dirs {
             full_dir.push(&sub_dir.path_name);
-            self.dir_builder.create(&full_dir);
+            self.dir_builder.create(&full_dir)?;
+
+            // add the path to the list of sub dirs for the parent dir_builder
+            self.add_sub_dir(&full_dir);
+
             full_dir.pop();
         }
         Ok(())
