@@ -1,6 +1,7 @@
 pub mod body_writer;
 pub mod header_writer;
 pub mod http_get_writer;
+pub mod util_writer;
 use crate::readers::assembler::Endpoint;
 
 pub fn write(endpoints: &Vec<&Endpoint>) -> std::io::Result<()> {
