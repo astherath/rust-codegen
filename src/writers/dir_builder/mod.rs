@@ -87,28 +87,4 @@ impl DirectoryBuilder {
         }
         Ok(())
     }
-    // -
-    // -    let config_paths = ["database", "config"];
-    // -    for path in &config_paths {
-    // -        let mut new_path = base_path.clone();
-    // -        new_path.push(path);
-    // -        builder.create(&new_path)?;
-    // -    }
-    // -
-    // -    let mut path_list = Vec::new();
-    // -
-    // -    {
-    // -        let path_str = "database/mod.rs";
-    // -        let mut new_path = base_path.clone();
-    // -        new_path.push(path_str);
-    // -        path_list.push(new_path.to_str().unwrap().to_string());
-    // -        let db_uri = &String::from(
-    // -            "mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb",
-    // -        );
-    // -        create_database_config_file(&new_path, db_uri)?;
-    // -    };
-    // -
-    // -    // path_list.push(new_path.to_str().unwrap().to_string());
-    // -
-    // -    Ok(path_list)
 }
