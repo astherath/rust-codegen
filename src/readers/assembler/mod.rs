@@ -97,6 +97,7 @@ pub struct Endpoint {
     pub query_param: Option<QueryParam>,
     // TODO: eventually this success code needs to be validated and wrapped in a StatusCode enum.
     pub success_code: u16,
+    pub return_model_name: String,
     pub return_model: String,
 }
 

@@ -10,8 +10,9 @@ name = "users"
 	http_verb = "Get"
 	query_param = {name = "user_id", field_type = "String"}
 	success_code = 200
+	return_model_name = "UserResponse"
 	return_model = """\
-	struct UserResponse {
+	{
 		name: String,
 		age: u16,
 		email: String,
@@ -23,7 +24,8 @@ name = "users"
 	name = "find_all_users"
 	http_verb = "Get"
 	success_code = 200
+	return_model_name = "UserResponseList"
 	return_model = """\
-	struct UserResponseList {
+	{
 		users: Vec<UserResponse>,
 	}"""

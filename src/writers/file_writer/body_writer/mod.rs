@@ -33,7 +33,7 @@ impl BodyBuilder for HttpGet {
         // method signature handling
         full_output_string.push_str(&self.method_signature_string());
 
-        // method boyd handling
+        // method body handling
         full_output_string.push_str(&self.method_body_string());
 
         full_output_string

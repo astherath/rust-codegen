@@ -24,8 +24,7 @@ pub fn write(endpoints: &Vec<&Endpoint>) -> std::io::Result<()> {
     // now handle the util file string/IO
     let db_uri = String::from("test");
     let util_builder = util_writer::UtilBuilder::new(db_uri);
-    let endpoint = endpoints.get(0).unwrap(); // XXX: dont use this for long please
-    let util_str = util_builder.get_util_method_string(endpoint);
+    let util_str = util_builder.get_util_method_string(endpoints);
 
     println!("{}", util_str);
 
