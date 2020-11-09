@@ -109,4 +109,13 @@ impl UtilBuilder {
         // placeholder for now obviously
         imports
     }
+
+    /// Returns string that holds the mongodb client connection
+    /// (only one instance per util file at most)
+    fn mongodb_client_string(&self) -> String {
+        format!(
+            "let client = Client::with_uri_str({}).await.unwrap();\n",
+            &self.database_uri
+        )
+    }
 }
