@@ -23,7 +23,7 @@ use toml;
 pub struct WebAPI {
     title: String,
     version: String,
-    groups: Vec<EndpointGroup>,
+    pub groups: Vec<EndpointGroup>,
 }
 
 /// Basic methods for the top-level struct. Basically all operations done by other classes
@@ -38,6 +38,21 @@ impl WebAPI {
         let parsed_toml: WebAPI = toml::from_str(toml_str).unwrap();
         parsed_toml
     }
+
+    /// Returns the list of endpoints (cleaner than having to actually access it directly)
+    ///
+    /// This iterates over all of the EndpointGroups and the pushes all of their endpoints onto
+    /// a `Vec<&Endpoint>`.
+    pub fn get_all_endpoints(&self) -> Vec<&Endpoint> {
+        let mut all_endpoints = Vec::new();
+        for group in &self.groups {
+            let group_endpoints = group.get_endpoints();
+            for endpoint in group_endpoints {
+                all_endpoints.push(endpoint);
+            }
+        }
+        all_endpoints
+    }
 }
 
 /// Holds the data for grouped endpoints working with the same logic.
@@ -50,9 +65,21 @@ impl WebAPI {
 ///
 /// Mainly exists to conform easily to TOML structure.
 #[derive(Deserialize, Debug)]
-struct EndpointGroup {
+pub struct EndpointGroup {
     name: String,
-    endpoints: Vec<Endpoint>,
+    pub endpoints: Vec<Endpoint>,
+}
+
+impl EndpointGroup {
+    /// Iterates over the endpoints the group owns and returns
+    /// a `Vec` of refences.
+    fn get_endpoints(&self) -> Vec<&Endpoint> {
+        let mut all_endpoints = Vec::new();
+        for endpoint in &self.endpoints {
+            all_endpoints.push(endpoint);
+        }
+        all_endpoints
+    }
 }
 
 /// Single-endpoint struct. Holds info such as type, route, input data, etc.
@@ -63,7 +90,7 @@ struct EndpointGroup {
 /// This is the single struct that should have the most meaningful data specific to a single
 /// transaction in the API as a whole.
 #[derive(Deserialize, Debug)]
-struct Endpoint {
+pub struct Endpoint {
     route: String,
     http_verb: HTTPVerbs,
     query_param: Option<QueryParam>,

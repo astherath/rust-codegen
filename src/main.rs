@@ -3,14 +3,18 @@ use std::process::Command;
 mod readers;
 mod writers;
 fn main() {
+    // read in toml and print it (for debug)
     let filename = String::from("sample.toml");
     let toml_reader = readers::parser::InputFileReader::from_file(&filename);
     toml_reader.pretty_print_data();
 
-    // writers
+    // writers::dir_builder
     let base_output_dir_str = String::from("output");
-    // let path_list = writers::dir_builder::build(base_output_dir_str).unwrap();
     writers::dir_builder::build(base_output_dir_str).unwrap();
+
+    // writers::file_writer
+    let endpoints = toml_reader.toml_data.get_all_endpoints();
+    let file_writer = writers::file_writer::write(&endpoints).unwrap();
 
     // for path_str in &path_list {
     // let path = Path::new(path_str);
