@@ -33,7 +33,6 @@ impl BodyBuilder for HttpGet {
         // method signature handling
         full_output_string.push_str(&self.method_signature_string());
 
-
         // method boyd handling
         full_output_string.push_str(&self.method_body_string());
 
@@ -74,7 +73,7 @@ impl BodyBuilder for HttpGet {
 
         // assemble the status code and the HttpResponse
         let status_code = format!(
-            "let status_code = StatusCode::from_u16({}).unwrap();",
+            "let status_code = http::StatusCode::from_u16({}).unwrap();",
             &self.endpoint.success_code
         );
 

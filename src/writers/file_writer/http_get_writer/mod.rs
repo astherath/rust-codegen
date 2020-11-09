@@ -28,10 +28,6 @@ impl HTTPGetEndpointBuilder {
     pub fn create_endpoint(&self, endpoint: &Endpoint) -> String {
         let mut full_endpoint_string = String::new();
 
-        // get and concat the header string to the output string
-        let header_string = HeaderBuilder::get_header_string_from_endpoint(endpoint);
-        full_endpoint_string.push_str(&header_string);
-
         // the full method body string is next
         let body_string_generator: HttpGet = BodyBuilder::new(endpoint);
         let body_string = body_string_generator.get_body_string_from_endpoint();
