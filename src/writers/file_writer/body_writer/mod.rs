@@ -13,12 +13,15 @@
 
 use crate::readers::assembler::Endpoint;
 
-
-pub struct HttpGet{endpoint: Endpoint}
+pub struct HttpGet {
+    endpoint: Endpoint,
+}
 
 impl BodyBuilder for HttpGet {
     fn new(endpoint: &Endpoint) -> HttpGet {
-        HttpGet{endpoint: endpoint.clone()}
+        HttpGet {
+            endpoint: endpoint.clone(),
+        }
     }
 
     fn get_body_string_from_endpoint(&self) -> String {
@@ -29,6 +32,10 @@ impl BodyBuilder for HttpGet {
 
         // method signature handling
         full_output_string.push_str(&self.method_signature_string());
+
+
+        // method boyd handling
+        full_output_string.push_str(&self.method_body_string());
 
         full_output_string
     }
@@ -43,22 +50,43 @@ impl BodyBuilder for HttpGet {
 
         let mut param_string = String::new();
 
-        if let Some(query) =  &self.endpoint.query_param {
+        if let Some(query) = &self.endpoint.query_param {
             param_string.push_str(&format!("{}: {}", query.name, query.field_type));
         }
 
         let fn_name = &self.endpoint.name;
-        format!("async fn {}({}) -> impl Responder {{\n", fn_name, param_string)
+        format!(
+            "async fn {}({}) -> impl Responder {{\n",
+            fn_name, param_string
+        )
     }
 
-    fn method_body_string(&self) -> String {String::new()}
-}
+    fn method_body_string(&self) -> String {
+        // setup and create the util method handler
+        let mut param_string = String::new();
+        if let Some(query) = &self.endpoint.query_param {
+            param_string.push_str(&format!("{}: {}", query.name, query.field_type));
+        }
+        let util_method = format!(
+            "let response = utils::{}_util({});",
+            &self.endpoint.name, param_string
+        );
 
+        // assemble the status code and the HttpResponse
+        let status_code = format!(
+            "let status_code = StatusCode::from_u16({}).unwrap();",
+            &self.endpoint.success_code
+        );
+
+        let http_response = String::from("HttpResponse::build(status_code).body(response)}");
+
+        format!("{}\n{}\n{}", util_method, status_code, http_response)
+    }
+}
 
 /// This trait is to be shared amongst all of the HTTP<verb>BodyStringBuilders, and has
 /// common util functions for them all so that unpacking calls work polymorphically
 pub trait BodyBuilder {
-
     /// Dummy constructor for allowing trait usage
     fn new(endpoint_ref: &Endpoint) -> Self;
 
