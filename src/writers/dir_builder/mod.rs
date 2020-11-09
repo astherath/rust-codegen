@@ -12,6 +12,18 @@ pub fn build(base_path_str: String) -> Result<()> {
     Ok(())
 }
 
+/// Very basic sub-directory struct to make it easy and simple to add
+/// sub-directories in the future.
+struct SubDir {
+    path_name: String,
+}
+
+impl SubDir {
+    fn new(path_name: String) -> SubDir {
+        SubDir { path_name }
+    }
+}
+
 /// Singleton whose sole job is to succesfully build the directory tree for the
 /// generated code to live in.
 ///
@@ -48,31 +60,38 @@ impl DirectoryBuilder {
             remove_dir_all(&self.base_dir)?;
             self.dir_builder.create(&self.base_dir)?;
         }
-        // -
-        // -    let config_paths = ["database", "config"];
-        // -    for path in &config_paths {
-        // -        let mut new_path = base_path.clone();
-        // -        new_path.push(path);
-        // -        builder.create(&new_path)?;
-        // -    }
-        // -
-        // -    let mut path_list = Vec::new();
-        // -
-        // -    {
-        // -        let path_str = "database/mod.rs";
-        // -        let mut new_path = base_path.clone();
-        // -        new_path.push(path_str);
-        // -        path_list.push(new_path.to_str().unwrap().to_string());
-        // -        let db_uri = &String::from(
-        // -            "mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb",
-        // -        );
-        // -        create_database_config_file(&new_path, db_uri)?;
-        // -    };
-        // -
-        // -    // path_list.push(new_path.to_str().unwrap().to_string());
-        // -
-        // -    Ok(path_list)
-
         Ok(())
     }
+
+    /// Creates all of the sub-directories within the `base_dir`.
+    ///
+    /// Works off of a vector of `SubDir` structs, so adding/removing
+    /// subdirs to the overall file hierarchy isn't a nightmare.
+    pub fn create_sub_directories(&self, sub_dirs: Vec<SubDir>) -> Result<()> {
+        Ok(())
+    }
+    // -
+    // -    let config_paths = ["database", "config"];
+    // -    for path in &config_paths {
+    // -        let mut new_path = base_path.clone();
+    // -        new_path.push(path);
+    // -        builder.create(&new_path)?;
+    // -    }
+    // -
+    // -    let mut path_list = Vec::new();
+    // -
+    // -    {
+    // -        let path_str = "database/mod.rs";
+    // -        let mut new_path = base_path.clone();
+    // -        new_path.push(path_str);
+    // -        path_list.push(new_path.to_str().unwrap().to_string());
+    // -        let db_uri = &String::from(
+    // -            "mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb",
+    // -        );
+    // -        create_database_config_file(&new_path, db_uri)?;
+    // -    };
+    // -
+    // -    // path_list.push(new_path.to_str().unwrap().to_string());
+    // -
+    // -    Ok(path_list)
 }
