@@ -5,6 +5,7 @@
 //! this code tries to hide as much of the actual interface it works with
 //! in order to simplify the top-level calls that the `file_writer` mod makes.
 
+use super::body_writer::HTTPGetBodyWriter;
 use super::header_writer::HeaderBuilder;
 use crate::readers::assembler::Endpoint;
 
