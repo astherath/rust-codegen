@@ -9,6 +9,17 @@ use std::path::{Path, PathBuf};
 pub fn build(base_path_str: String) -> Result<()> {
     let directory_builder = DirectoryBuilder::new(base_path_str);
     directory_builder.create_base_dir()?;
+
+    // assemble vec of sub-dirs
+    let sub_dir_strs = ["database", "config", "routes", "util", "models"];
+    let mut sub_dirs = Vec::new();
+    for dir_str in &sub_dir_strs {
+        let dir_string = dir_str.to_string();
+        sub_dirs.push(SubDir::new(dir_string));
+    }
+
+    // make the sub-dirs
+    directory_builder.create_sub_directories(sub_dirs)?;
     Ok(())
 }
 
@@ -67,7 +78,13 @@ impl DirectoryBuilder {
     ///
     /// Works off of a vector of `SubDir` structs, so adding/removing
     /// subdirs to the overall file hierarchy isn't a nightmare.
-    pub fn create_sub_directories(&self, sub_dirs: Vec<SubDir>) -> Result<()> {
+    fn create_sub_directories(&self, sub_dirs: Vec<SubDir>) -> Result<()> {
+        let mut full_dir = self.base_dir.clone();
+        for sub_dir in &sub_dirs {
+            full_dir.push(&sub_dir.path_name);
+            self.dir_builder.create(&full_dir);
+            full_dir.pop();
+        }
         Ok(())
     }
     // -
