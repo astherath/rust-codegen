@@ -1,4 +1,4 @@
-//! Writer module that writes most of the generated code in the form of
+//! StringBuilder module that writes most of the generated code in the form of
 //! the actual actix endpoint methods.
 //!
 //! Relies on data from `Endpoint` structs.
@@ -13,44 +13,48 @@
 
 use crate::readers::assembler::Endpoint;
 
-/// Base struct for the implementations of a single
-/// actix `GET` endpoint.
-struct HTTPGetBodyWriter {
-}
 
+pub struct HttpGet{endpoint: Endpoint}
 
-/// Note: none of these methods actually require an instanciation mainly because
-/// the writers only really expose one method to the public: `write`.
-impl HTTPGetBodyWriter {
-    /// Top-level function for the struct, returns final output string.
-    ///
-    /// Based entirely off of an `Endpoint` reference, decomposing it
-    /// into the final output string headed to file.
-    pub fn write(endpoint: &Endpoint) -> String {
-        String::from("lol")
+impl BodyBuilder for HttpGet {
+    fn new(endpoint: &Endpoint) -> HttpGet {
+        HttpGet{endpoint: endpoint.clone()}
     }
 
+    fn get_body_string_from_endpoint(&self) -> String {
+        format!("{:#?}", self.endpoint)
+    }
+
+    fn macro_string(&self) -> String {String::new()}
+
+    fn method_signature_string(&self) -> String {String::new()}
+
+    fn method_body_string(&self) -> String {String::new()}
 }
 
 
-/// This trait is to be shared amongst all of the HTTP<verb>BodyWriters, and has
+/// This trait is to be shared amongst all of the HTTP<verb>BodyStringBuilders, and has
 /// common util functions for them all so that unpacking calls work polymorphically
-trait HTTPBodyWriter {
+pub trait BodyBuilder {
+
+    /// Dummy constructor for allowing trait usage
+    fn new(endpoint_ref: &Endpoint) -> Self;
+
     /// Top-level function for the struct, returns final output string.
     ///
     /// Based entirely off of an `Endpoint` reference, decomposing it
     /// into the final output string headed to file.
-    pub fn new(endpoint: &Endpoint) -> String;
+    fn get_body_string_from_endpoint(&self) -> String;
 
     /// Returns the actix macro string for the specific HTTP<Verb> builder
-    fn macro_string() -> String;
+    fn macro_string(&self) -> String;
 
     /// Returns the actual method signature string for the actix method
-    fn method_signature_string() -> String;
+    fn method_signature_string(&self) -> String;
 
     /// Returns the body string of the actix method.
     ///
     /// This method can call many helper methods as long as the result
     /// returned is final and output-ready.
-    fn method_body_string() -> String;
+    fn method_body_string(&self) -> String;
 }

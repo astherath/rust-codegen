@@ -36,7 +36,7 @@ impl HeaderBuilder {
         let mut full_import_string = format!("use {}::{{", parent_actix_import);
         let child_imports = actix_imports.join(",");
         // asemble the full import string
-        full_import_string.push_str(&format!("{}}};", child_imports));
+        full_import_string.push_str(&format!("{}}};\n", child_imports));
 
         full_import_string
     }

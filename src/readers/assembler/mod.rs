@@ -89,7 +89,7 @@ impl EndpointGroup {
 ///
 /// This is the single struct that should have the most meaningful data specific to a single
 /// transaction in the API as a whole.
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Endpoint {
     route: String,
     http_verb: HTTPVerbs,
@@ -103,14 +103,14 @@ pub struct Endpoint {
 ///
 /// The `field_type` is a non-exhaustive enum of valid data types which are to be
 /// used later in conjunction with the `writer` mod.
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 struct QueryParam {
     name: String,
     field_type: UnitTypes,
 }
 
 /// Very small (and frankly hacky) list of accepted data types (think primitives but worse).
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 enum UnitTypes {
     String,
     U32,
@@ -124,7 +124,7 @@ enum UnitTypes {
 ///
 /// Eventually these will require their own valid implementation for use with
 /// the `writer` mod.
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 enum HTTPVerbs {
     Get,
     Post,

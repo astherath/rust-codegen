@@ -5,7 +5,7 @@
 //! this code tries to hide as much of the actual interface it works with
 //! in order to simplify the top-level calls that the `file_writer` mod makes.
 
-use super::body_writer::HTTPGetBodyWriter;
+use super::body_writer::{BodyBuilder, HttpGet};
 use super::header_writer::HeaderBuilder;
 use crate::readers::assembler::Endpoint;
 
@@ -28,9 +28,14 @@ impl HTTPGetEndpointBuilder {
     pub fn create_endpoint(&self, endpoint: &Endpoint) -> String {
         let mut full_endpoint_string = String::new();
 
-        // start assembling the strings and pushing onto the final one
+        // get and concat the header string to the output string
         let header_string = HeaderBuilder::get_header_string_from_endpoint(endpoint);
         full_endpoint_string.push_str(&header_string);
+
+        // the full method body string is next
+        let body_string_generator: HttpGet = BodyBuilder::new(endpoint);
+        let body_string = body_string_generator.get_body_string_from_endpoint();
+        full_endpoint_string.push_str(&body_string);
 
         full_endpoint_string
     }
