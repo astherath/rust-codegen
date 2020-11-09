@@ -46,7 +46,7 @@ impl SubDir {
 /// extendable by design.
 pub struct DirectoryBuilder {
     dir_builder: DirBuilder,
-    pub base_dir: PathBuf,
+    base_dir: PathBuf,
     pub sub_dirs: Vec<String>,
 }
 
