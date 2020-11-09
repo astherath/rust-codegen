@@ -12,7 +12,7 @@ fn main() {
 
     for path_str in &path_list {
         let path = Path::new(path_str);
-        run_rustfmt(path);
+        run_rustfmt(path).unwrap();
     }
 }
 
