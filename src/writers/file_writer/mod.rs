@@ -1,3 +1,4 @@
+pub mod body_writer;
 pub mod header_writer;
 pub mod http_get_writer;
 use crate::readers::assembler::Endpoint;
