@@ -24,19 +24,32 @@ impl BodyBuilder for HttpGet {
     fn get_body_string_from_endpoint(&self) -> String {
         let mut full_output_string = String::new();
 
-        let macro_header_string = self.macro_string();
-        full_output_string.push_str(&macro_header_string);
+        // macro header handling
+        full_output_string.push_str(&self.macro_string());
+
+        // method signature handling
+        full_output_string.push_str(&self.method_signature_string());
 
         full_output_string
     }
 
     fn macro_string(&self) -> String {
         let route = &self.endpoint.route;
-        let output_string = format!("#[get(\"{}\")]\n", route);
-        output_string
+        format!("#[get(\"{}\")]\n", route)
     }
 
-    fn method_signature_string(&self) -> String {String::new()}
+    fn method_signature_string(&self) -> String {
+        let mut output_string = String::new();
+
+        let mut param_string = String::new();
+
+        if let Some(query) =  &self.endpoint.query_param {
+            param_string.push_str(&format!("{}: {}", query.name, query.field_type));
+        }
+
+        let fn_name = &self.endpoint.name;
+        format!("async fn {}({}) -> impl Responder {{\n", fn_name, param_string)
+    }
 
     fn method_body_string(&self) -> String {String::new()}
 }

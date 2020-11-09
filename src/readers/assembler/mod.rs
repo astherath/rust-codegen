@@ -8,8 +8,8 @@
 //! ### NOTE:
 //! - All of the enums and structs used to parse *must* implement the `serde::Deserialize` trait.
 
-use hyper::StatusCode;
 use serde_derive::Deserialize;
+use std::fmt;
 use toml;
 
 /// Provides all of the top-level unpacking (deserialization) from the toml file.
@@ -92,6 +92,7 @@ impl EndpointGroup {
 #[derive(Deserialize, Debug, Clone)]
 pub struct Endpoint {
     pub route: String,
+    pub name: String,
     pub http_verb: HTTPVerbs,
     pub query_param: Option<QueryParam>,
     // TODO: eventually this success code needs to be validated and wrapped in a StatusCode enum.
@@ -105,8 +106,8 @@ pub struct Endpoint {
 /// used later in conjunction with the `writer` mod.
 #[derive(Deserialize, Debug, Clone)]
 pub struct QueryParam {
-    name: String,
-    field_type: UnitTypes,
+    pub name: String,
+    pub field_type: UnitTypes,
 }
 
 /// Very small (and frankly hacky) list of accepted data types (think primitives but worse).
@@ -117,6 +118,19 @@ pub enum UnitTypes {
     I32,
     U16,
     I16,
+}
+
+impl fmt::Display for UnitTypes {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let fmt_string = match self {
+            UnitTypes::String => "String",
+            UnitTypes::U32 => "u32",
+            UnitTypes::I32 => "i32",
+            UnitTypes::U16 => "u16",
+            UnitTypes::I16 => "i16",
+        };
+        write!(f, "{}", fmt_string)
+    }
 }
 
 // TODO: replace this with a `std` lib enum of http verbs.
