@@ -91,12 +91,12 @@ impl EndpointGroup {
 /// transaction in the API as a whole.
 #[derive(Deserialize, Debug, Clone)]
 pub struct Endpoint {
-    route: String,
-    http_verb: HTTPVerbs,
-    query_param: Option<QueryParam>,
+    pub route: String,
+    pub http_verb: HTTPVerbs,
+    pub query_param: Option<QueryParam>,
     // TODO: eventually this success code needs to be validated and wrapped in a StatusCode enum.
-    success_code: u16,
-    return_model: String,
+    pub success_code: u16,
+    pub return_model: String,
 }
 
 /// Made for requests (`GET`s) that need to take in a URL query string parameter.
@@ -104,14 +104,14 @@ pub struct Endpoint {
 /// The `field_type` is a non-exhaustive enum of valid data types which are to be
 /// used later in conjunction with the `writer` mod.
 #[derive(Deserialize, Debug, Clone)]
-struct QueryParam {
+pub struct QueryParam {
     name: String,
     field_type: UnitTypes,
 }
 
 /// Very small (and frankly hacky) list of accepted data types (think primitives but worse).
 #[derive(Deserialize, Debug, Clone)]
-enum UnitTypes {
+pub enum UnitTypes {
     String,
     U32,
     I32,
@@ -125,7 +125,7 @@ enum UnitTypes {
 /// Eventually these will require their own valid implementation for use with
 /// the `writer` mod.
 #[derive(Deserialize, Debug, Clone)]
-enum HTTPVerbs {
+pub enum HTTPVerbs {
     Get,
     Post,
     Delete,

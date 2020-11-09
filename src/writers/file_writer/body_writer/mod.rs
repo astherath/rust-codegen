@@ -22,10 +22,19 @@ impl BodyBuilder for HttpGet {
     }
 
     fn get_body_string_from_endpoint(&self) -> String {
-        format!("{:#?}", self.endpoint)
+        let mut full_output_string = String::new();
+
+        let macro_header_string = self.macro_string();
+        full_output_string.push_str(&macro_header_string);
+
+        full_output_string
     }
 
-    fn macro_string(&self) -> String {String::new()}
+    fn macro_string(&self) -> String {
+        let route = &self.endpoint.route;
+        let output_string = format!("#[get(\"{}\")]\n", route);
+        output_string
+    }
 
     fn method_signature_string(&self) -> String {String::new()}
 
