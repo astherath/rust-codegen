@@ -5,6 +5,7 @@
 //! this code tries to hide as much of the actual interface it works with
 //! in order to simplify the top-level calls that the `file_writer` mod makes.
 
+use super::header_writer::HeaderBuilder;
 use crate::readers::assembler::Endpoint;
 
 /// Main output builder interface (HTTP added in front to avoid naming confusion)
@@ -24,6 +25,12 @@ impl HTTPGetEndpointBuilder {
     /// Takes in an `Enpoint` struct reference, as it has all of the
     /// necessary info to split into the sub tasks.
     pub fn create_endpoint(&self, endpoint: &Endpoint) -> String {
-        format!("{:#?}", endpoint)
+        let mut full_endpoint_string = String::new();
+
+        // start assembling the strings and pushing onto the final one
+        let header_string = HeaderBuilder::get_header_string_from_endpoint(endpoint);
+        full_endpoint_string.push_str(&header_string);
+
+        full_endpoint_string
     }
 }
