@@ -98,8 +98,9 @@ impl UtilBuilder {
         let mut final_output_string = String::new();
         for endpoint in endpoints {
             let endpoint_util_string = UtilEndpointBuilder::get_util_string_from_endpoint(endpoint);
-            final_output_string.push_str(&endpoint_util_string)
+            final_output_string.push_str(&endpoint_util_string);
         }
+        final_output_string.push_str(&self.mongodb_client_string());
         final_output_string
     }
 
@@ -114,7 +115,29 @@ impl UtilBuilder {
     /// (only one instance per util file at most)
     fn mongodb_client_string(&self) -> String {
         format!(
-            "let client = Client::with_uri_str({}).await.unwrap();\n",
+            "
+            use mongodb::bson::{{doc, document::Document, oid::ObjectId, Bson}};
+            use mongodb::{{options::ClientOptions, Client, Collection}};
+
+            pub struct DB {{
+                pub client: Client,
+                }}
+
+            impl DB {{
+                pub async fn init() -> Result<Self> {{
+                    let mut client_options = ClientOptions::parse(\"{}\").await?;
+                    client_options.app_name = Some(\"TEST\".to_string());
+                    Ok(Self {{
+                        client: Client::with_options(client_options)?,
+                    }})
+                }}
+
+                pub fn get_collection(&self, db_name: String, collection: String) -> Collection {{
+                    self.client.database(db_name).collection(collection)
+                }}
+
+            }}
+            ",
             &self.database_uri
         )
     }
