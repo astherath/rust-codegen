@@ -23,6 +23,7 @@ use toml;
 pub struct WebAPI {
     title: String,
     version: String,
+    pub db_uri: String,
     pub groups: Vec<EndpointGroup>,
 }
 
@@ -67,6 +68,7 @@ impl WebAPI {
 #[derive(Deserialize, Debug)]
 pub struct EndpointGroup {
     name: String,
+    collection_name: String,
     pub endpoints: Vec<Endpoint>,
 }
 
