@@ -45,13 +45,13 @@ impl UtilEndpointBuilder {
         // create the string of params (if none given, 0 len string)
         let mut param_string = String::new();
         if let Some(query) = &self.endpoint.query_param {
-            param_string.push_str(&format!("{}: {}", query.name, query.field_type));
+            param_string.push_str(&format!("{}: {}, ", query.name, query.field_type));
         }
 
         // final output string
         format!(
-            "async fn {}({}) -> impl Responder {{\n",
-            &self.endpoint.name, param_string
+            "async fn {}({}collection: Collection) -> {} {{\n",
+            &self.endpoint.name, param_string, &self.endpoint.return_model_name
         )
     }
 
@@ -61,7 +61,9 @@ impl UtilEndpointBuilder {
     /// compilation/autofmt check to catch the errors (weight on user not system).
     fn method_return_struct_string(&self) -> String {
         format!(
-            "struct {} {}\n",
+            "\
+            #[derive(Deserialize, Debug)]
+            struct {} {}\n",
             &self.endpoint.return_model_name, &self.endpoint.return_model
         )
     }
@@ -69,7 +71,26 @@ impl UtilEndpointBuilder {
     /// Actual method body implementation generator. Most of the work on the module is
     /// done here. Add features with caution.
     fn method_body_string(&self) -> String {
-        String::new()
+        // not all endpoints will have queries, so depending on that,
+        // the actual generated mongo code will differ.
+
+        let query_string = {
+            if let Some(query) = &self.endpoint.query_param {
+                format!("\"{}\": {}", &query.name, &query.name)
+            } else {
+                format!("")
+            }
+        };
+
+        format!(
+            "\
+            let query = doc! {{{}}};
+            let document = collection.find_one(query, None).await.unwrap().unwrap();
+            let response: {} = from_bson(Bson::Document(document)).unwrap();
+            response
+        }}",
+            query_string, &self.endpoint.return_model_name
+        )
     }
 }
 
@@ -115,6 +136,14 @@ impl UtilBuilder {
     /// This also includes DB imports
     fn util_import_string(&self) -> String {
         let mut imports = String::new();
+
+        imports.push_str(&format!(
+            "\
+                use futures::stream::StreamExt;
+                use serde_derive::Deserialize;
+                use tokio;
+        "
+        ));
 
         // get database imports from the database_generator under the hood
         imports.push_str(&database_generator::get_database_import_string());
