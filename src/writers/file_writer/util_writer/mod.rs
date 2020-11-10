@@ -97,6 +97,11 @@ impl UtilBuilder {
     /// Allowing us to make a single util file for a vec of endpoints.
     pub fn get_util_method_string(&self, endpoints: &Vec<&Endpoint>) -> String {
         let mut final_output_string = String::new();
+
+        // add the file-wide import header string
+        final_output_string.push_str(&self.util_import_string());
+
+        // add the code for all of the endpoints (structs, methods, etc.)
         for endpoint in endpoints {
             let endpoint_util_string = UtilEndpointBuilder::get_util_string_from_endpoint(endpoint);
             final_output_string.push_str(&endpoint_util_string);
@@ -105,14 +110,20 @@ impl UtilBuilder {
         final_output_string
     }
 
-    /// Returns a string with the imports needed for the util file
+    /// Returns a string with the imports needed for the util file.
+    ///
+    /// This also includes DB imports
     fn util_import_string(&self) -> String {
         let mut imports = String::new();
-        // placeholder for now obviously
+
+        // get database imports from the database_generator under the hood
+        imports.push_str(&database_generator::get_database_import_string());
+
         imports
     }
 
-    /// Returns string that holds the mongodb client connection
+    /// Returns string that holds the mongodb client connection and
+    /// all of the other relevant DB related structs/implementations
     /// (only one instance per util file at most)
     fn mongodb_client_string(&self) -> String {
         // This actually just calls an internal module so as to not have to
