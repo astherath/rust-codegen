@@ -7,6 +7,7 @@
 //! - etc.
 
 use crate::readers::assembler::Endpoint;
+mod database_generator;
 
 /// Facade for the actual util builder.
 ///
@@ -114,31 +115,8 @@ impl UtilBuilder {
     /// Returns string that holds the mongodb client connection
     /// (only one instance per util file at most)
     fn mongodb_client_string(&self) -> String {
-        format!(
-            "
-            use mongodb::bson::{{doc, document::Document, oid::ObjectId, Bson}};
-            use mongodb::{{options::ClientOptions, Client, Collection}};
-
-            pub struct DB {{
-                pub client: Client,
-                }}
-
-            impl DB {{
-                pub async fn init() -> Result<Self> {{
-                    let mut client_options = ClientOptions::parse(\"{}\").await?;
-                    client_options.app_name = Some(\"TEST\".to_string());
-                    Ok(Self {{
-                        client: Client::with_options(client_options)?,
-                    }})
-                }}
-
-                pub fn get_collection(&self, db_name: String, collection: String) -> Collection {{
-                    self.client.database(db_name).collection(collection)
-                }}
-
-            }}
-            ",
-            &self.database_uri
-        )
+        // This actually just calls an internal module so as to not have to
+        // deal/edit the DB string here (too messy/large)
+        database_generator::get_database_setup_string(&self.database_uri)
     }
 }
