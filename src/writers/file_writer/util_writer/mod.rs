@@ -7,7 +7,7 @@
 //! - etc.
 
 use crate::readers::assembler::Endpoint;
-mod database_generator;
+pub mod database_generator;
 mod single_endpoint_generator;
 
 /// Holds all of the ops (altough interface will only call one) for the util builder.
@@ -15,9 +15,7 @@ mod single_endpoint_generator;
 /// Currently only holds a single piece of data that will be share by all util
 /// methods for the entire API, but obviously is made to be easily expanded upon.
 pub struct UtilBuilder {
-    database_uri: String,
-    database_name: String,
-    collection_name: String,
+    db_info: database_generator::DatabaseInfo,
 }
 
 impl UtilBuilder {
@@ -25,16 +23,8 @@ impl UtilBuilder {
     /// single endpoint regardless of HTTP Verb/other info.
     ///
     /// Assumes that database is MongoDB (to be extended at some point)
-    pub fn new(
-        database_uri: String,
-        database_name: String,
-        collection_name: String,
-    ) -> UtilBuilder {
-        UtilBuilder {
-            database_uri,
-            database_name,
-            collection_name,
-        }
+    pub fn new(db_info: database_generator::DatabaseInfo) -> UtilBuilder {
+        UtilBuilder { db_info }
     }
 
     /// Top level function for the builder; assembles and returns a single output-ready
@@ -56,7 +46,10 @@ impl UtilBuilder {
                 );
             final_output_string.push_str(&endpoint_util_string);
         }
+
+        // string gen. for the database related code
         final_output_string.push_str(&self.mongodb_client_string());
+
         final_output_string
     }
 
@@ -86,10 +79,6 @@ impl UtilBuilder {
     fn mongodb_client_string(&self) -> String {
         // This actually just calls an internal module so as to not have to
         // deal/edit the DB string here (too messy/large)
-        database_generator::get_database_setup_string(
-            &self.database_uri,
-            &self.database_name,
-            &self.collection_name,
-        )
+        database_generator::get_database_setup_string(&self.db_info)
     }
 }

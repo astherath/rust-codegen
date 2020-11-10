@@ -68,7 +68,7 @@ impl WebAPI {
 /// Mainly exists to conform easily to TOML structure.
 #[derive(Deserialize, Debug)]
 pub struct EndpointGroup {
-    name: String,
+    pub name: String,
     pub collection_name: String,
     pub endpoints: Vec<Endpoint>,
 }
@@ -76,7 +76,7 @@ pub struct EndpointGroup {
 impl EndpointGroup {
     /// Iterates over the endpoints the group owns and returns
     /// a `Vec` of refences.
-    fn get_endpoints(&self) -> Vec<&Endpoint> {
+    pub fn get_endpoints(&self) -> Vec<&Endpoint> {
         let mut all_endpoints = Vec::new();
         for endpoint in &self.endpoints {
             all_endpoints.push(endpoint);
