@@ -30,7 +30,9 @@ pub fn write(api_config: &WebAPI) -> std::io::Result<()> {
     // create a util_method builder and generate the util file string
     // for all of the endpoints at once
     let db_uri = api_config.db_uri.clone();
-    let util_builder = util_writer::UtilBuilder::new(db_uri);
+    let db_name = api_config.db_name.clone();
+    let collection_name = api_config.groups.get(0).unwrap().collection_name.clone();
+    let util_builder = util_writer::UtilBuilder::new(db_uri, db_name, collection_name);
     let util_str = util_builder.get_util_method_string(endpoints);
 
     println!("{}", util_str);

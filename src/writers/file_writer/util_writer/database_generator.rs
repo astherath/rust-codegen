@@ -5,7 +5,11 @@
 ///
 /// Main interface to be used in other generated methods is:
 /// `DB::get_collection(db_name, collection)`.
-pub fn get_database_setup_string(db_uri: &String) -> String {
+pub fn get_database_setup_string(
+    db_uri: &String,
+    db_name: &String,
+    collection_name: &String,
+) -> String {
     format!(
         "
             pub struct DB {{
@@ -20,12 +24,12 @@ pub fn get_database_setup_string(db_uri: &String) -> String {
                     Ok(DB {{ client }})
                 }}
 
-                pub fn get_collection(&self, db_name: &String, collection: &String) -> Collection {{
-                    self.client.database(db_name).collection(collection)
+                pub fn get_collection(&self) -> Collection {{
+                    self.client.database(\"{}\").collection(\"{}\")
                 }}
             }}
            ",
-        db_uri
+        db_uri, db_name, collection_name,
     )
 }
 

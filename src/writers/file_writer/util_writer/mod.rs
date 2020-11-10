@@ -16,6 +16,8 @@ mod single_endpoint_generator;
 /// methods for the entire API, but obviously is made to be easily expanded upon.
 pub struct UtilBuilder {
     database_uri: String,
+    database_name: String,
+    collection_name: String,
 }
 
 impl UtilBuilder {
@@ -23,8 +25,16 @@ impl UtilBuilder {
     /// single endpoint regardless of HTTP Verb/other info.
     ///
     /// Assumes that database is MongoDB (to be extended at some point)
-    pub fn new(database_uri: String) -> UtilBuilder {
-        UtilBuilder { database_uri }
+    pub fn new(
+        database_uri: String,
+        database_name: String,
+        collection_name: String,
+    ) -> UtilBuilder {
+        UtilBuilder {
+            database_uri,
+            database_name,
+            collection_name,
+        }
     }
 
     /// Top level function for the builder; assembles and returns a single output-ready
@@ -57,7 +67,7 @@ impl UtilBuilder {
         let mut imports = String::new();
 
         imports.push_str(&format!(
-            "\
+            "
                 use futures::stream::StreamExt;
                 use serde_derive::Deserialize;
                 use tokio;
@@ -76,6 +86,10 @@ impl UtilBuilder {
     fn mongodb_client_string(&self) -> String {
         // This actually just calls an internal module so as to not have to
         // deal/edit the DB string here (too messy/large)
-        database_generator::get_database_setup_string(&self.database_uri)
+        database_generator::get_database_setup_string(
+            &self.database_uri,
+            &self.database_name,
+            &self.collection_name,
+        )
     }
 }

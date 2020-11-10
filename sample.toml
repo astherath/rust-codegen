@@ -1,6 +1,7 @@
 title = "API Title"
 version = "V0.1"
 db_uri = "mongodb://127.0.0.1:27017/"
+db_name = "tests"
 
 [[groups]]
 name = "users"
@@ -16,7 +17,7 @@ collection_name = "users"
 	return_model = """\
 	{
 		name: String,
-		age: u16,
+		age: f32,
 		email: String,
 	}"""
 

@@ -7,7 +7,7 @@ use crate::readers::assembler::Endpoint;
 /// This allows us to build many endpoint util strings while only
 /// making a single UtilBuilder object, which greatly enhances the
 /// overall level of abstraction that callers of this module face.
-struct UtilEndpointBuilder {
+pub struct UtilEndpointBuilder {
     endpoint: Endpoint,
 }
 
@@ -19,7 +19,7 @@ impl UtilEndpointBuilder {
     ///
     /// If changes in order of the final output string are needed, or if
     /// a new component needs to be added, this is the method to edit first.
-    fn get_util_string_from_endpoint(endpoint_ref: &Endpoint) -> String {
+    pub fn get_util_string_from_endpoint(endpoint_ref: &Endpoint) -> String {
         // setting up the util builder
         let endpoint = endpoint_ref.clone();
         let util_builder = UtilEndpointBuilder { endpoint };
