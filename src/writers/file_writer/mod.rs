@@ -3,22 +3,41 @@ mod header_writer;
 mod http_get_writer;
 mod main_method_writer;
 mod util_writer;
-
 use crate::readers::assembler::{Endpoint, EndpointGroup, WebAPI};
+use crate::writers::dir_builder::{DirectoryBuilder, SubDir};
 use util_writer::database_generator::DatabaseInfo;
 
-pub fn write(api_config: &WebAPI) -> std::io::Result<()> {
+use std::collections::HashMap;
+
+pub fn write(api_config: &WebAPI, dir_builder: DirectoryBuilder) -> std::io::Result<()> {
+    let mut sub_dir_map = HashMap::new();
+    for sub_dir in &dir_builder.sub_dirs {
+        sub_dir_map.insert(sub_dir.clone(), sub_dir.as_path_str());
+    }
+
     for group in &api_config.groups {
         let util_method_string =
             FileWriterAssembler::util_method_string_from_group(api_config, group);
-        println!("{}", util_method_string);
+        let util_output_dir = sub_dir_map.get(&SubDir::Util);
+        println!(
+            "writiting to dir: {:#?} \n{}",
+            util_output_dir, util_method_string
+        );
 
         let actix_route_method_string =
             FileWriterAssembler::get_actix_routes_string_for_group(group);
-        println!("{}", actix_route_method_string);
+        let actix_output_dir = sub_dir_map.get(&SubDir::Routes);
+        println!(
+            "writiting to dir: {:#?} \n{}",
+            actix_output_dir, actix_route_method_string
+        );
 
         let main_method_string = main_method_writer::MainMethodBuilder::get_main_method_string();
-        println!("{}", main_method_string);
+        let main_method_output_dir = &dir_builder.base_dir;
+        println!(
+            "writiting to dir: {:#?} \n{}",
+            main_method_output_dir, main_method_string
+        );
     }
     Ok(())
 }
