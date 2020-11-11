@@ -1,20 +1,24 @@
-pub mod body_writer;
-pub mod header_writer;
-pub mod http_get_writer;
-pub mod util_writer;
+mod body_writer;
+mod header_writer;
+mod http_get_writer;
+mod main_method_writer;
+mod util_writer;
+
 use crate::readers::assembler::{Endpoint, EndpointGroup, WebAPI};
 use util_writer::database_generator::DatabaseInfo;
 
 pub fn write(api_config: &WebAPI) -> std::io::Result<()> {
     for group in &api_config.groups {
-        let collection_name = group.collection_name.clone();
-        let db_info = DatabaseInfo::from_web_api(api_config, collection_name);
-        let util_file_string =
-            FileWriterAssembler::get_util_method_string_for_group(db_info, group);
-        println!(
-            "util file string for group with name {}:\n{}",
-            &group.name, &util_file_string
-        );
+        let util_method_string =
+            FileWriterAssembler::util_method_string_from_group(api_config, group);
+        println!("{}", util_method_string);
+
+        let actix_route_method_string =
+            FileWriterAssembler::get_actix_routes_string_for_group(group);
+        println!("{}", actix_route_method_string);
+
+        let main_method_string = main_method_writer::MainMethodBuilder::get_main_method_string();
+        println!("{}", main_method_string);
     }
     Ok(())
 }
@@ -29,7 +33,7 @@ struct FileWriterAssembler;
 
 impl FileWriterAssembler {
     /// Gets the file ready actix route code that should go in `src/<group_name>/routes.rs`
-    fn get_actix_routes_string_for_group(group: EndpointGroup) -> String {
+    fn get_actix_routes_string_for_group(group: &EndpointGroup) -> String {
         // total output string to-be
         let mut full_output_string = String::new();
 
@@ -48,6 +52,17 @@ impl FileWriterAssembler {
         }
 
         full_output_string
+    }
+
+    fn util_method_string_from_group(api_config: &WebAPI, group: &EndpointGroup) -> String {
+        let collection_name = group.collection_name.clone();
+        let db_info = DatabaseInfo::from_web_api(api_config, collection_name);
+        let util_file_string = Self::get_util_method_string_for_group(db_info, group);
+
+        format!(
+            "util file string for group with name {}:\n{}",
+            &group.name, &util_file_string
+        )
     }
 
     fn get_util_method_string_for_group(db_info: DatabaseInfo, group: &EndpointGroup) -> String {

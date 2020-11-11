@@ -76,7 +76,7 @@ impl UtilEndpointBuilder {
 
         let query_string = {
             if let Some(query) = &self.endpoint.query_param {
-                format!("\"{}\": {}", &query.name, &query.name)
+                format!("{}", &query.name)
             } else {
                 format!("")
             }
