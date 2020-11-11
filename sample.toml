@@ -1,27 +1,34 @@
 title = "API Title"
 version = "V0.1"
+db_uri = "mongodb://127.0.0.1:27017/"
+db_name = "tests"
 
 [[groups]]
 name = "users"
+collection_name = "users"
 
 	[[groups.endpoints]]
 	route = "/find"
+	name = "find_user_by_id"
 	http_verb = "Get"
 	query_param = {name = "user_id", field_type = "String"}
 	success_code = 200
+	return_model_name = "UserResponse"
 	return_model = """\
-	struct UserResponse {
+	{
 		name: String,
-		age: u16,
+		age: f32,
 		email: String,
 	}"""
 
 
 	[[groups.endpoints]]
 	route = "/find/all"
+	name = "find_all_users"
 	http_verb = "Get"
 	success_code = 200
+	return_model_name = "UserResponseList"
 	return_model = """\
-	struct UserResponseList {
+	{
 		users: Vec<UserResponse>,
 	}"""

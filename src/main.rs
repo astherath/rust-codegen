@@ -13,8 +13,8 @@ fn main() {
     writers::dir_builder::build(base_output_dir_str).unwrap();
 
     // writers::file_writer
-    let endpoints = toml_reader.toml_data.get_all_endpoints();
-    let file_writer = writers::file_writer::write(&endpoints).unwrap();
+    // let endpoints = toml_reader.toml_data.get_all_endpoints();
+    let file_writer = writers::file_writer::write(&toml_reader.toml_data).unwrap();
 
     // for path_str in &path_list {
     // let path = Path::new(path_str);

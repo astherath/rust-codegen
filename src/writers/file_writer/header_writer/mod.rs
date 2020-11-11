@@ -6,8 +6,6 @@
 //!
 //! Header string includes module declarations, docstrings, and imports.
 
-use crate::readers::assembler::Endpoint;
-
 /// Acts just as a placeholder facade for the header string operations.
 ///
 /// Since no real data needs to be stored long term, it's easier to just have
@@ -17,7 +15,7 @@ pub struct HeaderBuilder {}
 impl HeaderBuilder {
     /// Top-level function for the struct that returns the final,
     /// assembled header string from endpoint data.
-    pub fn get_header_string_from_endpoint(endpoint: &Endpoint) -> String {
+    pub fn get_header_string() -> String {
         HeaderBuilder::get_import_string()
     }
 
@@ -28,7 +26,17 @@ impl HeaderBuilder {
     fn get_import_string() -> String {
         // TODO: this method might be better if it read data in from another source
         let parent_actix_import = "actix_web";
-        let actix_imports = ["middleware", "web", "App", "HttpRequest", "HttpServer"];
+        let actix_imports = [
+            "middleware",
+            "web",
+            "App",
+            "HttpRequest",
+            "HttpServer",
+            "http",
+            "get",
+            "HttpResponse",
+            "Responder",
+        ];
 
         // assemble the final import string
 
@@ -36,7 +44,7 @@ impl HeaderBuilder {
         let mut full_import_string = format!("use {}::{{", parent_actix_import);
         let child_imports = actix_imports.join(",");
         // asemble the full import string
-        full_import_string.push_str(&format!("{}}};", child_imports));
+        full_import_string.push_str(&format!("{}}};\n", child_imports));
 
         full_import_string
     }
