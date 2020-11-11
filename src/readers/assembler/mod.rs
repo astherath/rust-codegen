@@ -8,8 +8,8 @@
 //! ### NOTE:
 //! - All of the enums and structs used to parse *must* implement the `serde::Deserialize` trait.
 
-use hyper::StatusCode;
 use serde_derive::Deserialize;
+use std::fmt;
 use toml;
 
 /// Provides all of the top-level unpacking (deserialization) from the toml file.
@@ -23,7 +23,9 @@ use toml;
 pub struct WebAPI {
     title: String,
     version: String,
-    groups: Vec<EndpointGroup>,
+    pub db_uri: String,
+    pub db_name: String,
+    pub groups: Vec<EndpointGroup>,
 }
 
 /// Basic methods for the top-level struct. Basically all operations done by other classes
@@ -38,6 +40,21 @@ impl WebAPI {
         let parsed_toml: WebAPI = toml::from_str(toml_str).unwrap();
         parsed_toml
     }
+
+    /// Returns the list of endpoints (cleaner than having to actually access it directly)
+    ///
+    /// This iterates over all of the EndpointGroups and the pushes all of their endpoints onto
+    /// a `Vec<&Endpoint>`.
+    pub fn get_all_endpoints(&self) -> Vec<&Endpoint> {
+        let mut all_endpoints = Vec::new();
+        for group in &self.groups {
+            let group_endpoints = group.get_endpoints();
+            for endpoint in group_endpoints {
+                all_endpoints.push(endpoint);
+            }
+        }
+        all_endpoints
+    }
 }
 
 /// Holds the data for grouped endpoints working with the same logic.
@@ -50,9 +67,22 @@ impl WebAPI {
 ///
 /// Mainly exists to conform easily to TOML structure.
 #[derive(Deserialize, Debug)]
-struct EndpointGroup {
-    name: String,
-    endpoints: Vec<Endpoint>,
+pub struct EndpointGroup {
+    pub name: String,
+    pub collection_name: String,
+    pub endpoints: Vec<Endpoint>,
+}
+
+impl EndpointGroup {
+    /// Iterates over the endpoints the group owns and returns
+    /// a `Vec` of refences.
+    pub fn get_endpoints(&self) -> Vec<&Endpoint> {
+        let mut all_endpoints = Vec::new();
+        for endpoint in &self.endpoints {
+            all_endpoints.push(endpoint);
+        }
+        all_endpoints
+    }
 }
 
 /// Single-endpoint struct. Holds info such as type, route, input data, etc.
@@ -62,29 +92,31 @@ struct EndpointGroup {
 ///
 /// This is the single struct that should have the most meaningful data specific to a single
 /// transaction in the API as a whole.
-#[derive(Deserialize, Debug)]
-struct Endpoint {
-    route: String,
-    http_verb: HTTPVerbs,
-    query_param: Option<QueryParam>,
+#[derive(Deserialize, Debug, Clone)]
+pub struct Endpoint {
+    pub route: String,
+    pub name: String,
+    pub http_verb: HTTPVerbs,
+    pub query_param: Option<QueryParam>,
     // TODO: eventually this success code needs to be validated and wrapped in a StatusCode enum.
-    success_code: u16,
-    return_model: String,
+    pub success_code: u16,
+    pub return_model_name: String,
+    pub return_model: String,
 }
 
 /// Made for requests (`GET`s) that need to take in a URL query string parameter.
 ///
 /// The `field_type` is a non-exhaustive enum of valid data types which are to be
 /// used later in conjunction with the `writer` mod.
-#[derive(Deserialize, Debug)]
-struct QueryParam {
-    name: String,
-    field_type: UnitTypes,
+#[derive(Deserialize, Debug, Clone)]
+pub struct QueryParam {
+    pub name: String,
+    pub field_type: UnitTypes,
 }
 
 /// Very small (and frankly hacky) list of accepted data types (think primitives but worse).
-#[derive(Deserialize, Debug)]
-enum UnitTypes {
+#[derive(Deserialize, Debug, Clone)]
+pub enum UnitTypes {
     String,
     U32,
     I32,
@@ -92,13 +124,26 @@ enum UnitTypes {
     I16,
 }
 
+impl fmt::Display for UnitTypes {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let fmt_string = match self {
+            UnitTypes::String => "String",
+            UnitTypes::U32 => "u32",
+            UnitTypes::I32 => "i32",
+            UnitTypes::U16 => "u16",
+            UnitTypes::I16 => "i16",
+        };
+        write!(f, "{}", fmt_string)
+    }
+}
+
 // TODO: replace this with a `std` lib enum of http verbs.
 /// Very basic (and probably bad) implementation of the few accepted HTTP Verbs.
 ///
 /// Eventually these will require their own valid implementation for use with
 /// the `writer` mod.
-#[derive(Deserialize, Debug)]
-enum HTTPVerbs {
+#[derive(Deserialize, Debug, Clone)]
+pub enum HTTPVerbs {
     Get,
     Post,
     Delete,
