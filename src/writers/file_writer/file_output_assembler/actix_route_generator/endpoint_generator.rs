@@ -5,11 +5,6 @@
 //!
 //! Should ONLY ever be written to a file AFTER the header string has been
 //! written to it (else compile will fail).
-//!
-//! FIXME: The name is a bit misleading, in reality it just composes the
-//! output file strings without writing them. Maybe a refactor is in the works?
-//! Or maybe the module should actually write to IO.
-//! Worst case we can name swap between this mod and `HTTPGetEndpointBuilder`.
 
 use crate::readers::assembler::Endpoint;
 
@@ -17,7 +12,7 @@ pub struct HttpGet {
     endpoint: Endpoint,
 }
 
-impl BodyBuilder for HttpGet {
+impl ActixRouteBuilder for HttpGet {
     fn new(endpoint: &Endpoint) -> HttpGet {
         HttpGet {
             endpoint: endpoint.clone(),
@@ -85,7 +80,7 @@ impl BodyBuilder for HttpGet {
 
 /// This trait is to be shared amongst all of the HTTP<verb>BodyStringBuilders, and has
 /// common util functions for them all so that unpacking calls work polymorphically
-pub trait BodyBuilder {
+pub trait ActixRouteBuilder {
     /// Dummy constructor for allowing trait usage
     fn new(endpoint_ref: &Endpoint) -> Self;
 
