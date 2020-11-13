@@ -4,24 +4,25 @@ mod main_method_generator;
 mod util_generator;
 
 use crate::readers::assembler::{Endpoint, EndpointGroup, WebAPI};
-use util_writer::database_generator::DatabaseInfo;
+use util_generator::database_generator::DatabaseInfo;
 
 /// Handles the assembly of the individual final output strings
 /// from all of the submodule generators.
 ///
 /// Also we can now tear apart the groups and generate strings `EndpointGroup`-wise
 pub struct FileOutputAssembler {
-    group: &'static EndpointGroup,
+    group: EndpointGroup,
 }
 
 impl FileOutputAssembler {
     /// Constructs the assembler
-    pub fn from_endpoint_group(group: &EndpointGroup) -> Self {
-        FileOutputAssembler(group)
+    pub fn from_endpoint_group(group_ref: &EndpointGroup) -> Self {
+        let group = (*group_ref).clone();
+        FileOutputAssembler { group }
     }
 
     /// Gets the file ready actix route code that should go in `src/<group_name>/routes.rs`
-    pub fn get_actix_routes_string_for_group(&self) -> String {
+    pub fn get_actix_routes_string(&self) -> String {
         // total output string to-be
         let mut full_output_string = String::new();
 
@@ -39,19 +40,26 @@ impl FileOutputAssembler {
         full_output_string
     }
 
-    pub fn get_util_method_string_for_group(&self, api_config: &WebAPI) -> String {
+    /// `main.rs` method output generator interface
+    pub fn get_main_method_string(&self) -> String {
+        main_method_generator::get_main_method_string()
+    }
+
+    /// Util method generator interface. Requires extra data for the database
+    /// info, so we need the `WebAPI` passed in here
+    pub fn get_util_method_string(&self, api_config: &WebAPI) -> String {
         let collection_name = self.group.collection_name.clone();
         let db_info = DatabaseInfo::from_web_api(api_config, collection_name);
         let util_file_string = self.build_util_method_string(db_info);
 
-        format!(&util_file_string)
+        format!("{}", &util_file_string)
     }
 
     fn build_util_method_string(&self, db_info: DatabaseInfo) -> String {
         // create a util_method builder and generate the util file string
         // for all of the endpoints at once
         let endpoints = &self.group.get_endpoints();
-        let util_builder = util_writer::UtilBuilder::new(db_info);
+        let util_builder = util_generator::UtilBuilder::new(db_info);
         let util_str = util_builder.get_util_method_string(endpoints);
 
         util_str

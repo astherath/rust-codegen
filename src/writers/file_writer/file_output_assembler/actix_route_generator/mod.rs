@@ -5,10 +5,10 @@
 //! this code tries to hide as much of the actual interface it works with
 //! in order to simplify the top-level calls that the `file_writer` mod makes.
 
-mod endpoint_generator:
-use endpoint_generator::{ActixRouteBuilder, HttpGet};
+mod endpoint_generator;
 use super::header_generator::HeaderBuilder;
 use crate::readers::assembler::Endpoint;
+use endpoint_generator::{ActixRouteBuilder, HttpGet};
 
 /// Main output builder interface (HTTP added in front to avoid naming confusion)
 ///

@@ -66,7 +66,7 @@ impl WebAPI {
 /// granular and mapable struct types.
 ///
 /// Mainly exists to conform easily to TOML structure.
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct EndpointGroup {
     pub name: String,
     pub collection_name: String,

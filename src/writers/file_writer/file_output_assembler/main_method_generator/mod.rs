@@ -2,11 +2,20 @@
 
 use crate::readers::assembler::Endpoint;
 
+/// Only public interface for the `mod` that returns the
+/// finished string output.
+///
+/// Behind the scenes instanciates and uses `MainMethodBuilder`
+/// struct calls.
+pub fn get_main_method_string() -> String {
+    MainMethodBuilder::get_main_method_string()
+}
+
 /// Interface for the main method string builder.
-pub struct MainMethodBuilder {}
+struct MainMethodBuilder {}
 
 impl MainMethodBuilder {
-    pub fn get_main_method_string() -> String {
+    fn get_main_method_string() -> String {
         // output string-to-be
         let mut full_output_string = String::new();
 
