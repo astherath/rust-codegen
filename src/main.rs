@@ -15,16 +15,5 @@ fn main() {
     dir_builder.build().unwrap();
 
     // writers::file_writer
-    // let endpoints = toml_reader.toml_data.get_all_endpoints();
     let file_writer = writers::file_writer::write(&toml_reader.toml_data, dir_builder).unwrap();
-
-    // for path_str in &path_list {
-    // let path = Path::new(path_str);
-    // run_rustfmt(path).unwrap();
-    // }
-}
-
-fn _run_rustfmt(path: &Path) -> std::io::Result<()> {
-    Command::new("rustfmt").args(path.to_str()).output()?;
-    Ok(())
 }
