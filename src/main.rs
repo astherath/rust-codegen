@@ -1,6 +1,5 @@
 mod readers;
 mod writers;
-use std::path::Path;
 use writers::dir_builder::DirectoryBuilder;
 
 fn main() {
@@ -21,7 +20,7 @@ fn main() {
     writers::file_writer::write(&toml_reader.toml_data, dir_builder).unwrap();
 
     // format all .rs files in generated directory
-    writers::post_operator::do_post_write_ops(Path::new(&String::from("./GENERATED"))).unwrap();
+    writers::post_operator::do_post_write_ops(&String::from("./GENERATED")).unwrap();
 
     // nice little out message for now (pre-cli lol)
     println!("Done, generated files are at {}.", &base_output_dir_str)

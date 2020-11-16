@@ -139,6 +139,7 @@ impl DirectoryBuilder {
 
     /// Runs `cargo new` for the path to be generated
     fn run_cargo_new(project_name: &String) {
+        println!("RUNNING CARGO NEW");
         Command::new("cargo new").args(&[project_name]);
     }
 }

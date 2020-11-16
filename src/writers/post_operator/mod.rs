@@ -1,10 +1,10 @@
-// use glob::glob;
 mod cargo_dependency_writer;
 use std::path::Path;
 use std::process::Command;
 
-fn format_all_rs(path: &Path) -> std::io::Result<()> {
+fn format_all_rs(path_string: &String) -> std::io::Result<()> {
     // Calls rustfmt on all files ending in .rs within path directory and all subdirectories
+    let path = Path::new(path_string);
     Command::new("cargo")
         .args(&[
             "fmt",
@@ -17,6 +17,8 @@ fn format_all_rs(path: &Path) -> std::io::Result<()> {
 
 // TODO: find a better name for this function
 pub fn do_post_write_ops(base_path_str: &String) -> std::io::Result<()> {
-    format_all_rs(base_path_str);
-    write_cargo_toml_file(base_path_str);
+    format_all_rs(base_path_str)?;
+    cargo_dependency_writer::write_cargo_toml_file(base_path_str)?;
+
+    Ok(())
 }
