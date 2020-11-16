@@ -1,5 +1,6 @@
-use std::fs::File;
+use std::fs::OpenOptions;
 use std::io::prelude::*;
+use std::path::Path;
 
 fn get_cargo_dependency_string() -> String {
     let dependencies = [
@@ -23,8 +24,16 @@ fn get_cargo_dependency_string() -> String {
     output_string
 }
 
-pub fn write_cargo_toml_file(path_str: &String) -> std::io::Result<()> {
-    let mut file = File::create(path_str)?;
+pub fn write_cargo_toml_file(base_path_str: &String) -> std::io::Result<()> {
+    let file_path = Path::new(&format!("{}/Cargo.toml", base_path_str));
+
+    // create file with options instead of fs::File for appending
+    let mut file = OpenOptions::new()
+        .write(true)
+        .append(true)
+        .open(file_path)
+        .unwrap();
+
     let cargo_deps = get_cargo_dependency_string();
     file.write_all(cargo_deps.as_bytes())?;
 
