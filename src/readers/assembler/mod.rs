@@ -55,6 +55,18 @@ impl WebAPI {
         }
         all_endpoints
     }
+
+    /// Returns a list of the names for the groups.
+    /// Used to build the group-specific subdirectories
+    pub fn get_group_names(&self) -> Vec<String> {
+        let mut group_names = Vec::new();
+
+        for group in &self.groups {
+            group_names.push(group.name.clone());
+        }
+
+        group_names
+    }
 }
 
 /// Holds the data for grouped endpoints working with the same logic.

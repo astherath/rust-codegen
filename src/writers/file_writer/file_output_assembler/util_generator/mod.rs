@@ -61,9 +61,7 @@ impl UtilBuilder {
 
         imports.push_str(&format!(
             "
-                use futures::stream::StreamExt;
-                use serde_derive::Deserialize;
-                use tokio;
+                use serde_derive::{{Deserialize, Serialize}};
         "
         ));
 

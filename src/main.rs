@@ -9,9 +9,11 @@ fn main() {
     let toml_reader = readers::parser::InputFileReader::from_file(&filename);
     toml_reader.pretty_print_data();
 
-    // writers::dir_builder
-    let base_output_dir_str = String::from("output");
-    let mut dir_builder = DirectoryBuilder::new(base_output_dir_str);
+    // make the sub directories with a DirectoryBuilder
+    let base_output_dir_str = String::from("GENERATED/src");
+    // each group will get a subdirectory so we need the names now
+    let group_names = toml_reader.toml_data.get_group_names();
+    let mut dir_builder = DirectoryBuilder::new(base_output_dir_str, group_names);
     dir_builder.build().unwrap();
 
     // writers::file_writer

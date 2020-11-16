@@ -45,12 +45,12 @@ impl ActixRouteBuilder for HttpGet {
         let mut param_string = String::new();
 
         if let Some(query) = &self.endpoint.query_param {
-            param_string.push_str(&format!("{}: {}", query.name, query.field_type));
+            param_string.push_str(&format!("{}: {}, ", query.name, query.field_type));
         }
 
         let fn_name = &self.endpoint.name;
         format!(
-            "async fn {}({}) -> impl Responder {{\n",
+            "async fn {}({}data: web::Data<util::DB>) -> impl Responder {{\n",
             fn_name, param_string
         )
     }
@@ -59,22 +59,18 @@ impl ActixRouteBuilder for HttpGet {
         // setup and create the util method handler
         let mut param_string = String::new();
         if let Some(query) = &self.endpoint.query_param {
-            param_string.push_str(&format!("{}: {}", query.name, query.field_type));
+            param_string.push_str(&format!("{}, ", query.name));
         }
         let util_method = format!(
-            "let response = utils::{}_util({});",
+            "
+            let collection = data.get_collection();
+            let response = util::{}_util({}collection).await;",
             &self.endpoint.name, param_string
         );
 
-        // assemble the status code and the HttpResponse
-        let status_code = format!(
-            "let status_code = http::StatusCode::from_u16({}).unwrap();",
-            &self.endpoint.success_code
-        );
+        let http_response = String::from("HttpResponse::Ok().json(response)}");
 
-        let http_response = String::from("HttpResponse::build(status_code).body(response)}");
-
-        format!("{}\n{}\n{}", util_method, status_code, http_response)
+        format!("{}\n{}", util_method, http_response)
     }
 }
 
