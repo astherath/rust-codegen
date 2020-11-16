@@ -17,6 +17,9 @@ fn main() {
     // writers::file_writer
     writers::file_writer::write(&toml_reader.toml_data, dir_builder).unwrap();
 
+    // format all .rs files in generated directory
+    writers::post_operator::format_all_rs(Path(base_output_dir_str));
+
     // nice little out message for now (pre-cli lol)
     println!("Done, generated files are at {}.", &base_output_dir_str)
 }
