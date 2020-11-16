@@ -1,38 +1,39 @@
 // use crate::readers::assembler::WebAPI;
-use std::fs::{remove_dir_all, DirBuilder, File};
-use std::io::{Result, Write};
-use std::path::{Path, PathBuf};
+use std::fs::{remove_dir_all, DirBuilder};
+use std::io::Result;
+use std::path::PathBuf;
 
-/// Highest level function abstracts away the struct and all of its calls.
+/// Serves as a flag indicator for the (very limited) types of
+/// sub-directories possible.
 ///
-/// Should succeed at creating the entirety of the directory tree needed.
-pub fn build(base_path_str: String) -> Result<()> {
-    let mut directory_builder = DirectoryBuilder::new(base_path_str);
-    directory_builder.create_base_dir()?;
-
-    // assemble vec of sub-dirs
-    let sub_dir_strs = ["database", "config", "routes", "util", "models"];
-    let mut sub_dirs = Vec::new();
-    for dir_str in &sub_dir_strs {
-        let dir_string = dir_str.to_string();
-        sub_dirs.push(SubDir::new(dir_string));
-    }
-
-    // make the sub-dirs
-    directory_builder.create_sub_directories(&sub_dirs)?;
-
-    Ok(())
-}
-
-/// Very basic sub-directory struct to make it easy and simple to add
-/// sub-directories in the future.
-struct SubDir {
-    path_name: String,
+/// This helps a lot when placing the files in their respective directories (cleanly).
+#[derive(Eq, PartialEq, Hash, Clone)]
+pub enum SubDir {
+    Util,
+    Routes,
+    Models,
+    Other,
 }
 
 impl SubDir {
-    fn new(path_name: String) -> SubDir {
-        SubDir { path_name }
+    /// Matches the incoming path string to an unwrappable enum
+    fn from_path_str(path_str: &String) -> Self {
+        match path_str.as_str() {
+            "routes" => Self::Routes,
+            "util" => Self::Util,
+            "models" => Self::Models,
+            _ => Self::Other,
+        }
+    }
+
+    pub fn as_path_str(&self) -> String {
+        match self {
+            Self::Routes => "routes",
+            Self::Util => "util",
+            Self::Models => "models",
+            Self::Other => "",
+        }
+        .to_string()
     }
 }
 
@@ -46,22 +47,44 @@ impl SubDir {
 /// extendable by design.
 pub struct DirectoryBuilder {
     dir_builder: DirBuilder,
-    base_dir: PathBuf,
-    pub sub_dirs: Vec<String>,
+    pub base_dir: PathBuf,
+    pub sub_dirs: Vec<SubDir>,
+    group_names: Vec<String>,
 }
 
 impl DirectoryBuilder {
     /// Constructor that takes in the root output directory where all of the
     /// generated code will reside.
-    pub fn new(output_dir_str: String) -> DirectoryBuilder {
-        let dir_builder = DirBuilder::new();
+    pub fn new(output_dir_str: String, group_names: Vec<String>) -> DirectoryBuilder {
+        let mut dir_builder = DirBuilder::new();
+        dir_builder.recursive(true);
         let base_dir = PathBuf::from(output_dir_str);
         let sub_dirs = Vec::new();
         DirectoryBuilder {
             dir_builder,
             base_dir,
             sub_dirs,
+            group_names,
         }
+    }
+
+    /// Highest level function abstracts away the struct and all of its calls.
+    ///
+    /// Should succeed at creating the entirety of the directory tree needed.
+    pub fn build(&mut self) -> Result<()> {
+        self.create_base_dir()?;
+
+        // assemble vec of sub-dirs
+        let sub_dir_strs = ["routes", "util", "models"];
+        let mut sub_dirs = Vec::new();
+        for dir_str in &sub_dir_strs {
+            sub_dirs.push(dir_str.to_string());
+        }
+
+        // make the sub-dir
+        self.create_sub_directories(&sub_dirs)?;
+
+        Ok(())
     }
 
     /// Creates the base directory and nothing more.
@@ -78,24 +101,26 @@ impl DirectoryBuilder {
         Ok(())
     }
 
-    /// Small (and ugly) helper function for
-    /// pushing a subdir to the DirectoryBuilder
-    fn add_sub_dir(&mut self, sub_dir: &PathBuf) {
-        self.sub_dirs.push(sub_dir.to_str().unwrap().to_string());
-    }
-
     /// Creates all of the sub-directories within the `base_dir`.
     ///
     /// Works off of a vector of `SubDir` structs, so adding/removing
     /// subdirs to the overall file hierarchy isn't a nightmare.
-    fn create_sub_directories(&mut self, sub_dirs: &Vec<SubDir>) -> Result<()> {
+    fn create_sub_directories(&mut self, sub_dirs: &Vec<String>) -> Result<()> {
         let mut full_dir = self.base_dir.clone();
-        for sub_dir in sub_dirs {
-            full_dir.push(&sub_dir.path_name);
-            self.dir_builder.create(&full_dir)?;
 
-            // add the path to the list of sub dirs for the parent dir_builder
-            self.add_sub_dir(&full_dir);
+        // add the group name to the dir to be created for each group
+        for group_name in &self.group_names {
+            full_dir.push(&group_name);
+
+            for sub_dir in sub_dirs {
+                // add sub dir to path and create the dir, then remove it
+                full_dir.push(&sub_dir);
+                self.dir_builder.create(&full_dir)?;
+                full_dir.pop();
+
+                // add the path to the list of sub dirs for the parent dir_builder
+                self.sub_dirs.push(SubDir::from_path_str(sub_dir));
+            }
 
             full_dir.pop();
         }

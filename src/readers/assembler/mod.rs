@@ -41,19 +41,16 @@ impl WebAPI {
         parsed_toml
     }
 
-    /// Returns the list of endpoints (cleaner than having to actually access it directly)
-    ///
-    /// This iterates over all of the EndpointGroups and the pushes all of their endpoints onto
-    /// a `Vec<&Endpoint>`.
-    pub fn get_all_endpoints(&self) -> Vec<&Endpoint> {
-        let mut all_endpoints = Vec::new();
+    /// Returns a list of the names for the groups.
+    /// Used to build the group-specific subdirectories
+    pub fn get_group_names(&self) -> Vec<String> {
+        let mut group_names = Vec::new();
+
         for group in &self.groups {
-            let group_endpoints = group.get_endpoints();
-            for endpoint in group_endpoints {
-                all_endpoints.push(endpoint);
-            }
+            group_names.push(group.name.clone());
         }
-        all_endpoints
+
+        group_names
     }
 }
 
@@ -66,7 +63,7 @@ impl WebAPI {
 /// granular and mapable struct types.
 ///
 /// Mainly exists to conform easily to TOML structure.
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct EndpointGroup {
     pub name: String,
     pub collection_name: String,

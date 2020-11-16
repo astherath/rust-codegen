@@ -1,78 +1,129 @@
-mod body_writer;
-mod header_writer;
-mod http_get_writer;
-mod main_method_writer;
-mod util_writer;
+// mod http_get_writer;
+use std::fs::File;
+use std::io::prelude::*;
+use std::path::PathBuf;
+mod file_output_assembler;
+use crate::readers::assembler::{EndpointGroup, WebAPI};
+use crate::writers::dir_builder::{DirectoryBuilder, SubDir};
+use file_output_assembler::FileOutputAssembler;
 
-use crate::readers::assembler::{Endpoint, EndpointGroup, WebAPI};
-use util_writer::database_generator::DatabaseInfo;
+pub fn write(api_config: &WebAPI, dir_builder: DirectoryBuilder) -> std::io::Result<()> {
+    let root_dir = dir_builder.base_dir.clone();
+    let mut file_writer = FileWriter::from_base_dir(root_dir);
 
-pub fn write(api_config: &WebAPI) -> std::io::Result<()> {
+    // write the main file (outside of group)
+    let main_method_string = FileOutputAssembler::get_main_method_string();
+    file_writer.write_main_function(main_method_string).unwrap();
+
+    // write to file
     for group in &api_config.groups {
-        let util_method_string =
-            FileWriterAssembler::util_method_string_from_group(api_config, group);
-        println!("{}", util_method_string);
+        // update the file directory for the group
+        file_writer.update_base_dir(group);
 
-        let actix_route_method_string =
-            FileWriterAssembler::get_actix_routes_string_for_group(group);
-        println!("{}", actix_route_method_string);
+        // instanciate the single output assembler for the group
+        let output_assembler = FileOutputAssembler::from_endpoint_group(group);
 
-        let main_method_string = main_method_writer::MainMethodBuilder::get_main_method_string();
-        println!("{}", main_method_string);
+        // write the util to file
+        let util_method_string = output_assembler.get_util_method_string(api_config);
+        file_writer.write_output_to_file(&SubDir::Util, util_method_string)?;
+
+        // write the actix route code
+        let actix_route_method_string = output_assembler.get_actix_routes_string();
+        file_writer.write_output_to_file(&SubDir::Routes, actix_route_method_string)?;
+
+        // finally write the mod file for the group
+        file_writer.write_mod_rs_to_file().unwrap();
     }
     Ok(())
 }
 
-/// Holds the actual implementation of the `write()` implemented.
-///
-/// We really only need some of the `WebAPI` data, so it's just easier to work
-/// with the data like this.
-///
-/// Also we can now tear apart the groups and generate strings `EndpointGroup`-wise
-struct FileWriterAssembler;
+/// Only handled file IO based on sub directories
+struct FileWriter {
+    base_dir: PathBuf,
+    group_base_dir: PathBuf,
+}
 
-impl FileWriterAssembler {
-    /// Gets the file ready actix route code that should go in `src/<group_name>/routes.rs`
-    fn get_actix_routes_string_for_group(group: &EndpointGroup) -> String {
-        // total output string to-be
-        let mut full_output_string = String::new();
-
-        // get and concat the header string to the output string
-        let header_string = header_writer::HeaderBuilder::get_header_string();
-        full_output_string.push_str(&header_string);
-
-        // FIXME: this name is bad; this comment shouldn't be needed
-        // writer responsible for writing actix endpoint code
-        let writer = http_get_writer::HTTPGetEndpointBuilder::new();
-
-        // for each endpoint, write the actix route method code
-        for endpoint in &group.get_endpoints() {
-            let endpoint_string = writer.create_endpoint(endpoint);
-            full_output_string.push_str(&format!("{}\n", endpoint_string));
+impl FileWriter {
+    fn from_base_dir(base_dir: PathBuf) -> Self {
+        let group_base_dir = base_dir.clone();
+        Self {
+            base_dir,
+            group_base_dir,
         }
-
-        full_output_string
     }
 
-    fn util_method_string_from_group(api_config: &WebAPI, group: &EndpointGroup) -> String {
-        let collection_name = group.collection_name.clone();
-        let db_info = DatabaseInfo::from_web_api(api_config, collection_name);
-        let util_file_string = Self::get_util_method_string_for_group(db_info, group);
+    /// Private helper function that handles file IO given the sub/base dir
+    fn write_output_to_file(&mut self, sub_dir: &SubDir, content: String) -> std::io::Result<()> {
+        // create new directory with the sub_dir and the filename
+        let mut file_path = PathBuf::from(sub_dir.as_path_str());
+        let filename = String::from("mod.rs");
 
+        // add file to base path
+        file_path.push(filename);
+        self.group_base_dir.push(file_path);
+
+        // open file and write `content` to it
+        let mut file = File::create(&self.group_base_dir)?;
+
+        // pop the subdir from the base path once file was made
+        // NOTE: this is a VERY ugly way to do this, but it ~should~ always work.
+        // probably time to find a better way to do this eventually
+        self.group_base_dir.pop();
+        self.group_base_dir.pop();
+
+        file.write_all(content.as_bytes())?;
+
+        Ok(())
+    }
+
+    /// Special main function writer (no subdir)
+    fn write_main_function(&mut self, content: String) -> std::io::Result<()> {
+        // create new directory with the sub_dir and the filename
+        let filename = String::from("main.rs");
+
+        // add file to base path
+        self.group_base_dir.push(filename);
+
+        // open file and write `content` to it
+        let mut file = File::create(&self.group_base_dir)?;
+        file.write_all(content.as_bytes())?;
+
+        self.group_base_dir.pop();
+
+        Ok(())
+    }
+
+    /// Changes the base directory to be based on the group
+    fn update_base_dir(&mut self, group: &EndpointGroup) {
+        self.group_base_dir = self.base_dir.clone();
+        self.group_base_dir.push(&group.name);
+    }
+
+    /// Generate the static `mod.rs` string
+    fn get_mod_string(&self) -> String {
         format!(
-            "util file string for group with name {}:\n{}",
-            &group.name, &util_file_string
+            "\
+        pub mod util;
+        pub mod routes;
+        "
         )
     }
 
-    fn get_util_method_string_for_group(db_info: DatabaseInfo, group: &EndpointGroup) -> String {
-        let endpoints = &group.get_endpoints();
+    /// Doesn't require a path OR a string (same modules get written to always)
+    fn write_mod_rs_to_file(&mut self) -> std::io::Result<()> {
+        // create new directory with the sub_dir and the filename
+        let filename = String::from("mod.rs");
 
-        // create a util_method builder and generate the util file string
-        // for all of the endpoints at once
-        let util_builder = util_writer::UtilBuilder::new(db_info);
-        let util_str = util_builder.get_util_method_string(endpoints);
+        // add file to base path
+        self.group_base_dir.push(filename);
 
-        util_str
+        // open file and write `content` to it
+        let mut file = File::create(&self.group_base_dir)?;
+        let mod_file_content = self.get_mod_string();
+        file.write_all(mod_file_content.as_bytes())?;
+
+        self.group_base_dir.pop();
+
+        Ok(())
     }
 }

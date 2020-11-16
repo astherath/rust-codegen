@@ -5,11 +5,6 @@
 //!
 //! Should ONLY ever be written to a file AFTER the header string has been
 //! written to it (else compile will fail).
-//!
-//! FIXME: The name is a bit misleading, in reality it just composes the
-//! output file strings without writing them. Maybe a refactor is in the works?
-//! Or maybe the module should actually write to IO.
-//! Worst case we can name swap between this mod and `HTTPGetEndpointBuilder`.
 
 use crate::readers::assembler::Endpoint;
 
@@ -17,7 +12,7 @@ pub struct HttpGet {
     endpoint: Endpoint,
 }
 
-impl BodyBuilder for HttpGet {
+impl ActixRouteBuilder for HttpGet {
     fn new(endpoint: &Endpoint) -> HttpGet {
         HttpGet {
             endpoint: endpoint.clone(),
@@ -45,17 +40,15 @@ impl BodyBuilder for HttpGet {
     }
 
     fn method_signature_string(&self) -> String {
-        let mut output_string = String::new();
-
         let mut param_string = String::new();
 
         if let Some(query) = &self.endpoint.query_param {
-            param_string.push_str(&format!("{}: {}", query.name, query.field_type));
+            param_string.push_str(&format!("{}: {}, ", query.name, query.field_type));
         }
 
         let fn_name = &self.endpoint.name;
         format!(
-            "async fn {}({}) -> impl Responder {{\n",
+            "async fn {}({}data: web::Data<util::DB>) -> impl Responder {{\n",
             fn_name, param_string
         )
     }
@@ -64,28 +57,24 @@ impl BodyBuilder for HttpGet {
         // setup and create the util method handler
         let mut param_string = String::new();
         if let Some(query) = &self.endpoint.query_param {
-            param_string.push_str(&format!("{}: {}", query.name, query.field_type));
+            param_string.push_str(&format!("{}, ", query.name));
         }
         let util_method = format!(
-            "let response = utils::{}_util({});",
+            "
+            let collection = data.get_collection();
+            let response = util::{}_util({}collection).await;",
             &self.endpoint.name, param_string
         );
 
-        // assemble the status code and the HttpResponse
-        let status_code = format!(
-            "let status_code = http::StatusCode::from_u16({}).unwrap();",
-            &self.endpoint.success_code
-        );
+        let http_response = String::from("HttpResponse::Ok().json(response)}");
 
-        let http_response = String::from("HttpResponse::build(status_code).body(response)}");
-
-        format!("{}\n{}\n{}", util_method, status_code, http_response)
+        format!("{}\n{}", util_method, http_response)
     }
 }
 
 /// This trait is to be shared amongst all of the HTTP<verb>BodyStringBuilders, and has
 /// common util functions for them all so that unpacking calls work polymorphically
-pub trait BodyBuilder {
+pub trait ActixRouteBuilder {
     /// Dummy constructor for allowing trait usage
     fn new(endpoint_ref: &Endpoint) -> Self;
 
