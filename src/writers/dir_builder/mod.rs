@@ -1,8 +1,7 @@
 // use crate::readers::assembler::WebAPI;
-use std::error::Error;
-use std::fs::{remove_dir_all, DirBuilder, File};
-use std::io::{Result, Write};
-use std::path::{Path, PathBuf};
+use std::fs::{remove_dir_all, DirBuilder};
+use std::io::Result;
+use std::path::PathBuf;
 
 /// Serves as a flag indicator for the (very limited) types of
 /// sub-directories possible.
@@ -116,7 +115,6 @@ impl DirectoryBuilder {
             for sub_dir in sub_dirs {
                 // add sub dir to path and create the dir, then remove it
                 full_dir.push(&sub_dir);
-                println!("at dir builder: {:#?}", &full_dir);
                 self.dir_builder.create(&full_dir)?;
                 full_dir.pop();
 

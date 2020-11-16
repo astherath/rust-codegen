@@ -40,8 +40,6 @@ impl ActixRouteBuilder for HttpGet {
     }
 
     fn method_signature_string(&self) -> String {
-        let mut output_string = String::new();
-
         let mut param_string = String::new();
 
         if let Some(query) = &self.endpoint.query_param {

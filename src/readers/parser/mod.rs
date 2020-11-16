@@ -34,9 +34,4 @@ impl InputFileReader {
         let toml_data = WebAPI::parse_toml(&file_data);
         InputFileReader { toml_data }
     }
-
-    /// Very temporary function to smoke check the incoming data by printing it out
-    pub fn pretty_print_data(&self) {
-        println!("{:#?}", self.toml_data);
-    }
 }

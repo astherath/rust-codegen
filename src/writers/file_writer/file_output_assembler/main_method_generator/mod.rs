@@ -1,7 +1,5 @@
 //! Writes a single functions - `main`. Has the code to run the async actix function.
 
-use crate::readers::assembler::Endpoint;
-
 /// Only public interface for the `mod` that returns the
 /// finished string output.
 ///

@@ -2,7 +2,7 @@ mod actix_route_generator;
 mod main_method_generator;
 mod util_generator;
 
-use crate::readers::assembler::{Endpoint, EndpointGroup, WebAPI};
+use crate::readers::assembler::{EndpointGroup, WebAPI};
 use util_generator::database_generator::DatabaseInfo;
 
 /// Handles the assembly of the individual final output strings

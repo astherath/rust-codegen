@@ -3,17 +3,17 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::PathBuf;
 mod file_output_assembler;
-use crate::readers::assembler::{Endpoint, EndpointGroup, WebAPI};
+use crate::readers::assembler::{EndpointGroup, WebAPI};
 use crate::writers::dir_builder::{DirectoryBuilder, SubDir};
 use file_output_assembler::FileOutputAssembler;
 
 pub fn write(api_config: &WebAPI, dir_builder: DirectoryBuilder) -> std::io::Result<()> {
-    let mut root_dir = dir_builder.base_dir.clone();
+    let root_dir = dir_builder.base_dir.clone();
     let mut file_writer = FileWriter::from_base_dir(root_dir);
 
     // write the main file (outside of group)
     let main_method_string = FileOutputAssembler::get_main_method_string();
-    file_writer.write_main_function(main_method_string);
+    file_writer.write_main_function(main_method_string).unwrap();
 
     // write to file
     for group in &api_config.groups {
@@ -32,7 +32,7 @@ pub fn write(api_config: &WebAPI, dir_builder: DirectoryBuilder) -> std::io::Res
         file_writer.write_output_to_file(&SubDir::Routes, actix_route_method_string)?;
 
         // finally write the mod file for the group
-        file_writer.write_mod_rs_to_file();
+        file_writer.write_mod_rs_to_file().unwrap();
     }
     Ok(())
 }
@@ -61,8 +61,6 @@ impl FileWriter {
         // add file to base path
         file_path.push(filename);
         self.group_base_dir.push(file_path);
-
-        println!("at write_output_to_file: {:#?}", &self.group_base_dir);
 
         // open file and write `content` to it
         let mut file = File::create(&self.group_base_dir)?;
