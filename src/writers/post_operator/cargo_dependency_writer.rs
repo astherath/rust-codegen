@@ -27,7 +27,6 @@ fn get_cargo_dependency_string() -> String {
 pub fn write_cargo_toml_file(base_path_str: &String) -> std::io::Result<()> {
     let mut file_path = PathBuf::from(base_path_str);
     file_path.push(String::from("Cargo.toml"));
-    println!("file path: {:#?}", file_path);
 
     // create file with options instead of fs::File for appending
     let mut file = OpenOptions::new()
