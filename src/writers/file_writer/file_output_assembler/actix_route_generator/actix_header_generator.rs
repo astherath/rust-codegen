@@ -16,7 +16,7 @@ impl HeaderBuilder {
     /// Top-level function for the struct that returns the final,
     /// assembled header string from endpoint data.
     pub fn get_header_string() -> String {
-        HeaderBuilder::get_import_string()
+        Self::get_import_string()
     }
 
     /// Handles the string literals that have the imports.
@@ -26,25 +26,17 @@ impl HeaderBuilder {
     fn get_import_string() -> String {
         // TODO: this method might be better if it read data in from another source
         let parent_actix_import = "actix_web";
-        let actix_imports = [
-            "middleware",
-            "web",
-            "App",
-            "HttpRequest",
-            "HttpServer",
-            "http",
-            "get",
-            "HttpResponse",
-            "Responder",
-        ];
+        let actix_imports = ["web", "get", "HttpResponse", "Responder"];
 
         // assemble the final import string
-
         // this creates the "use foo::{" string, with space for the child imports to come
         let mut full_import_string = format!("use {}::{{", parent_actix_import);
         let child_imports = actix_imports.join(",");
         // asemble the full import string
         full_import_string.push_str(&format!("{}}};\n", child_imports));
+
+        // add remaining misc (i.e. non-actix) imports
+        full_import_string.push_str(&String::from("use super::util;"));
 
         full_import_string
     }

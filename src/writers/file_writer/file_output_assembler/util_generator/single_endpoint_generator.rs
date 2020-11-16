@@ -50,7 +50,7 @@ impl UtilEndpointBuilder {
 
         // final output string
         format!(
-            "async fn {}({}collection: Collection) -> {} {{\n",
+            "pub async fn {}_util({}collection: Collection) -> {} {{\n",
             &self.endpoint.name, param_string, &self.endpoint.return_model_name
         )
     }
@@ -62,8 +62,8 @@ impl UtilEndpointBuilder {
     fn method_return_struct_string(&self) -> String {
         format!(
             "\
-            #[derive(Deserialize, Debug)]
-            struct {} {}\n",
+            #[derive(Serialize, Deserialize, Debug)]
+            pub struct {} {}\n",
             &self.endpoint.return_model_name, &self.endpoint.return_model
         )
     }
@@ -76,7 +76,7 @@ impl UtilEndpointBuilder {
 
         let query_string = {
             if let Some(query) = &self.endpoint.query_param {
-                format!("{}", &query.name)
+                format!("\"{}\": {}", &query.name, &query.name)
             } else {
                 format!("")
             }

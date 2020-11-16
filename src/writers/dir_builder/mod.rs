@@ -1,8 +1,7 @@
 // use crate::readers::assembler::WebAPI;
-use std::error::Error;
-use std::fs::{remove_dir_all, DirBuilder, File};
-use std::io::{Result, Write};
-use std::path::{Path, PathBuf};
+use std::fs::{remove_dir_all, DirBuilder};
+use std::io::Result;
+use std::path::PathBuf;
 
 /// Serves as a flag indicator for the (very limited) types of
 /// sub-directories possible.
@@ -50,9 +49,25 @@ pub struct DirectoryBuilder {
     dir_builder: DirBuilder,
     pub base_dir: PathBuf,
     pub sub_dirs: Vec<SubDir>,
+    group_names: Vec<String>,
 }
 
 impl DirectoryBuilder {
+    /// Constructor that takes in the root output directory where all of the
+    /// generated code will reside.
+    pub fn new(output_dir_str: String, group_names: Vec<String>) -> DirectoryBuilder {
+        let mut dir_builder = DirBuilder::new();
+        dir_builder.recursive(true);
+        let base_dir = PathBuf::from(output_dir_str);
+        let sub_dirs = Vec::new();
+        DirectoryBuilder {
+            dir_builder,
+            base_dir,
+            sub_dirs,
+            group_names,
+        }
+    }
+
     /// Highest level function abstracts away the struct and all of its calls.
     ///
     /// Should succeed at creating the entirety of the directory tree needed.
@@ -70,19 +85,6 @@ impl DirectoryBuilder {
         self.create_sub_directories(&sub_dirs)?;
 
         Ok(())
-    }
-
-    /// Constructor that takes in the root output directory where all of the
-    /// generated code will reside.
-    pub fn new(output_dir_str: String) -> DirectoryBuilder {
-        let dir_builder = DirBuilder::new();
-        let base_dir = PathBuf::from(output_dir_str);
-        let sub_dirs = Vec::new();
-        DirectoryBuilder {
-            dir_builder,
-            base_dir,
-            sub_dirs,
-        }
     }
 
     /// Creates the base directory and nothing more.
@@ -105,14 +107,22 @@ impl DirectoryBuilder {
     /// subdirs to the overall file hierarchy isn't a nightmare.
     fn create_sub_directories(&mut self, sub_dirs: &Vec<String>) -> Result<()> {
         let mut full_dir = self.base_dir.clone();
-        for sub_dir in sub_dirs {
-            // add sub dir to path and create the dir, then remove it
-            full_dir.push(&sub_dir);
-            self.dir_builder.create(&full_dir)?;
-            full_dir.pop();
 
-            // add the path to the list of sub dirs for the parent dir_builder
-            self.sub_dirs.push(SubDir::from_path_str(sub_dir));
+        // add the group name to the dir to be created for each group
+        for group_name in &self.group_names {
+            full_dir.push(&group_name);
+
+            for sub_dir in sub_dirs {
+                // add sub dir to path and create the dir, then remove it
+                full_dir.push(&sub_dir);
+                self.dir_builder.create(&full_dir)?;
+                full_dir.pop();
+
+                // add the path to the list of sub dirs for the parent dir_builder
+                self.sub_dirs.push(SubDir::from_path_str(sub_dir));
+            }
+
+            full_dir.pop();
         }
         Ok(())
     }
