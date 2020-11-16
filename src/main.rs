@@ -7,11 +7,12 @@ fn main() {
     let toml_reader = readers::parser::InputFileReader::from_file(&filename);
 
     // make the sub directories with a DirectoryBuilder
-    let base_output_dir_str = String::from("GENERATED/src");
+    let base_output_dir_str = String::from("GENERATED");
 
     // each group will get a subdirectory so we need the names now
     let group_names = toml_reader.toml_data.get_group_names();
-    let mut dir_builder = DirectoryBuilder::new(base_output_dir_str.clone(), group_names);
+    // let mut dir_builder = DirectoryBuilder::new(base_output_dir_str.clone(), group_names);
+    let mut dir_builder = DirectoryBuilder::new(&base_output_dir_str, group_names);
     dir_builder.build().unwrap();
 
     // writers::file_writer

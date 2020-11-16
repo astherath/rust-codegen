@@ -2,6 +2,7 @@
 use std::fs::{remove_dir_all, DirBuilder};
 use std::io::Result;
 use std::path::PathBuf;
+use std::process::Command;
 
 /// Serves as a flag indicator for the (very limited) types of
 /// sub-directories possible.
@@ -55,11 +56,20 @@ pub struct DirectoryBuilder {
 impl DirectoryBuilder {
     /// Constructor that takes in the root output directory where all of the
     /// generated code will reside.
-    pub fn new(output_dir_str: String, group_names: Vec<String>) -> DirectoryBuilder {
+    pub fn new(output_dir_str: &String, group_names: Vec<String>) -> DirectoryBuilder {
+        // make the directory builder and allow recursive path building
         let mut dir_builder = DirBuilder::new();
         dir_builder.recursive(true);
-        let base_dir = PathBuf::from(output_dir_str);
+
+        // run cargo new first
+        Self::run_cargo_new(output_dir_str);
+
+        // convert the path string to a path buf
+        let base_dir = PathBuf::from(&format!("{}/src", output_dir_str));
+
+        // sub directory vector to hold the enums
         let sub_dirs = Vec::new();
+
         DirectoryBuilder {
             dir_builder,
             base_dir,
@@ -125,5 +135,10 @@ impl DirectoryBuilder {
             full_dir.pop();
         }
         Ok(())
+    }
+
+    /// Runs `cargo new` for the path to be generated
+    fn run_cargo_new(project_name: &String) {
+        Command::new("cargo new").args(&[project_name]);
     }
 }
