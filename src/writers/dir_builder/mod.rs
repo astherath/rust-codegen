@@ -1,7 +1,7 @@
 // use crate::readers::assembler::WebAPI;
 use std::fs::{remove_dir_all, DirBuilder};
 use std::io::Result;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 /// Serves as a flag indicator for the (very limited) types of
@@ -139,6 +139,16 @@ impl DirectoryBuilder {
 
     /// Runs `cargo new` for the path to be generated
     fn run_cargo_new(project_name: &String) {
-        Command::new("cargo new").args(&[project_name]);
+        // check if the dir exists, if so, just return early
+        if Path::new(project_name).exists() {
+            return;
+        }
+        // make the directory first
+        DirBuilder::new().create(project_name).unwrap();
+
+        Command::new("cargo")
+            .args(&["init", project_name])
+            .output()
+            .unwrap();
     }
 }
