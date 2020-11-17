@@ -10,9 +10,8 @@ use std::fs;
 
 /// Arbitrary file-reading util function.
 /// Returns the file data as a single string (for use with the `toml::de::Deserializer`).
-fn read_file_data(filename: &String) -> String {
-    let contents = fs::read_to_string(filename).expect("Unable to read file");
-    contents
+fn read_file_data(filename: &str) -> String {
+    fs::read_to_string(filename).expect("Unable to read file")
 }
 
 /// Main top-level struct that handles all of the reading of the input file.
@@ -29,7 +28,7 @@ impl InputFileReader {
     ///
     /// Reads the file data into a single `str` and uses it to
     /// populate the struct with a `toml::de::Deserializer`.
-    pub fn from_file(filename: &String) -> InputFileReader {
+    pub fn from_file(filename: &str) -> InputFileReader {
         let file_data = read_file_data(filename);
         let toml_data = WebAPI::parse_toml(&file_data);
         InputFileReader { toml_data }

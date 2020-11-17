@@ -1,7 +1,6 @@
 use std::fs::OpenOptions;
 use std::io::prelude::*;
 use std::path::PathBuf;
-use toml;
 
 fn get_cargo_dependency_string() -> String {
     let dependencies = [
@@ -26,7 +25,7 @@ fn get_cargo_dependency_string() -> String {
 }
 
 /// Writes the `[dependencies]` section of the generated toml file
-pub fn write_cargo_toml_file(base_path_str: &String) -> std::io::Result<()> {
+pub fn write_cargo_toml_file(base_path_str: &str) -> std::io::Result<()> {
     let mut file_path = PathBuf::from(base_path_str);
     file_path.push(String::from("Cargo.toml"));
 
@@ -67,5 +66,6 @@ fn check_written_already(path_str: &PathBuf) -> std::io::Result<bool> {
             }
         }
     }
-    return Ok(false);
+
+    Ok(false)
 }

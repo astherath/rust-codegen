@@ -32,7 +32,7 @@ impl UtilBuilder {
     ///
     /// Under the hood, this method actually makes calls to the `UtilEndpointBuilder` struct,
     /// Allowing us to make a single util file for a vec of endpoints.
-    pub fn get_util_method_string(&self, endpoints: &Vec<&Endpoint>) -> String {
+    pub fn get_util_method_string(&self, endpoints: &[&Endpoint]) -> String {
         let mut final_output_string = String::new();
 
         // add the file-wide import header string
@@ -59,11 +59,7 @@ impl UtilBuilder {
     fn util_import_string(&self) -> String {
         let mut imports = String::new();
 
-        imports.push_str(&format!(
-            "
-                use serde_derive::{{Deserialize, Serialize}};
-        "
-        ));
+        imports.push_str(&"\nuse serde_derive::{{Deserialize, Serialize}};\n".to_string());
 
         // get database imports from the database_generator under the hood
         imports.push_str(&database_generator::get_database_import_string());

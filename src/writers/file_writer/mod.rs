@@ -8,7 +8,7 @@ use crate::writers::dir_builder::{DirectoryBuilder, SubDir};
 use file_output_assembler::FileOutputAssembler;
 
 pub fn write(api_config: &WebAPI, dir_builder: DirectoryBuilder) -> std::io::Result<()> {
-    let root_dir = dir_builder.base_dir.clone();
+    let root_dir = dir_builder.base_dir;
     let mut file_writer = FileWriter::from_base_dir(root_dir);
 
     // write the main file (outside of group)
@@ -101,12 +101,9 @@ impl FileWriter {
 
     /// Generate the static `mod.rs` string
     fn get_mod_string(&self) -> String {
-        format!(
-            "\
-        pub mod util;
-        pub mod routes;
-        "
-        )
+        "\npub mod util;
+        pub mod routes;\n"
+            .to_string()
     }
 
     /// Doesn't require a path OR a string (same modules get written to always)
