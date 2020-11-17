@@ -51,9 +51,8 @@ impl FileOutputAssembler {
     pub fn get_util_method_string(&self, api_config: &WebAPI) -> String {
         let collection_name = self.group.collection_name.clone();
         let db_info = DatabaseInfo::from_web_api(api_config, collection_name);
-        let util_file_string = self.build_util_method_string(db_info);
 
-        format!("{}", &util_file_string)
+        self.build_util_method_string(db_info)
     }
 
     fn build_util_method_string(&self, db_info: DatabaseInfo) -> String {
@@ -61,8 +60,7 @@ impl FileOutputAssembler {
         // for all of the endpoints at once
         let endpoints = &self.group.get_endpoints();
         let util_builder = util_generator::UtilBuilder::new(db_info);
-        let util_str = util_builder.get_util_method_string(endpoints);
 
-        util_str
+        util_builder.get_util_method_string(endpoints)
     }
 }

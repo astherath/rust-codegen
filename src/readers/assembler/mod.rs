@@ -10,7 +10,6 @@
 
 use serde_derive::Deserialize;
 use std::fmt;
-use toml;
 
 /// Provides all of the top-level unpacking (deserialization) from the toml file.
 ///
@@ -36,7 +35,7 @@ impl WebAPI {
     ///
     /// *NOTE*: the `toml::from_str` here is unwrapped, meaning that the
     /// error messages passed are not really that great or legible.
-    pub fn parse_toml(toml_str: &String) -> WebAPI {
+    pub fn parse_toml(toml_str: &str) -> WebAPI {
         let parsed_toml: WebAPI = toml::from_str(toml_str).unwrap();
         parsed_toml
     }
