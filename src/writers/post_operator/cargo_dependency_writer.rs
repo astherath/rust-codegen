@@ -25,10 +25,12 @@ fn get_cargo_dependency_string() -> String {
     output_string
 }
 
+/// Writes the `[dependencies]` section of the generated toml file
 pub fn write_cargo_toml_file(base_path_str: &String) -> std::io::Result<()> {
     let mut file_path = PathBuf::from(base_path_str);
     file_path.push(String::from("Cargo.toml"));
 
+    // if the file exists and has been written to, return early (i.e. skip write)
     if let Ok(val) = check_written_already(&file_path) {
         if val {
             return Ok(());
@@ -46,11 +48,13 @@ pub fn write_cargo_toml_file(base_path_str: &String) -> std::io::Result<()> {
     file.write_all(cargo_deps.as_bytes())?;
 
     // write the toml flag to file
-    file.write_all(get_toml_written_string().as_bytes())?;
+    file.write_all(String::from("\n[other]\nwritten = true").as_bytes())?;
 
     Ok(())
 }
 
+/// Returns `Ok(true)` if the file has a `written` flag set to `true`, else
+/// either returns false or returns an error if file is unnaccessible.
 fn check_written_already(path_str: &PathBuf) -> std::io::Result<bool> {
     let contents = std::fs::read_to_string(path_str).expect("Unable to read file");
     let parsed_toml: toml::Value = toml::from_str(&contents)?;
@@ -64,8 +68,4 @@ fn check_written_already(path_str: &PathBuf) -> std::io::Result<bool> {
         }
     }
     return Ok(false);
-}
-
-fn get_toml_written_string() -> String {
-    String::from("\n[other]\nwritten = true")
 }
