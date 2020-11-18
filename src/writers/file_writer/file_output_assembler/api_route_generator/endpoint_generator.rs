@@ -20,59 +20,43 @@ impl RocketRouteBuilder for HttpGet {
     }
 
     fn get_body_string_from_endpoint(&self) -> String {
-        let mut full_output_string = String::new();
-
-        // macro header handling
-        full_output_string.push_str(&self.macro_string());
-
-        // method signature handling
-        full_output_string.push_str(&self.method_signature_string());
-
-        // method body handling
-        full_output_string.push_str(&self.method_body_string());
-
-        full_output_string
+        [
+            self.macro_string(),
+            self.method_signature_string(),
+            self.method_body_string(),
+        ]
+        .join("\n")
     }
 
     fn macro_string(&self) -> String {
         let route = &self.endpoint.route;
-        format!("#[get(\"{}\")]\n", route)
+        format!("#[get(\"{}\")]", route)
     }
 
     fn method_signature_string(&self) -> String {
-        let mut param_string = String::new();
-
-        if let Some(query) = &self.endpoint.query_param {
-            param_string.push_str(&format!("{}: {}, ", query.name, query.field_type));
-        }
-
-        let fn_name = &self.endpoint.name;
         format!(
-            "async fn {}({}data: web::Data<util::DB>) -> impl Responder {{\n",
-            fn_name, param_string
+            "fn {}() -> String {{",
+            &self.endpoint.name // &self.endpoint.name, &self.endpoint.return_model_name
         )
     }
 
     fn method_body_string(&self) -> String {
-        // setup and create the util method handler
         let mut param_string = String::new();
         if let Some(query) = &self.endpoint.query_param {
             param_string.push_str(&format!("{}, ", query.name));
         }
-        let util_method = format!(
-            "
-            let collection = data.get_collection();
-            let response = util::{}_util({}collection).await;",
+
+        let util_method_call = format!(
+            "let response = util::{}_util({});",
             &self.endpoint.name, param_string
         );
+        let return_statement = "response}".to_string();
 
-        let http_response = String::from("HttpResponse::Ok().json(response)}");
-
-        format!("{}\n{}", util_method, http_response)
+        [util_method_call, return_statement].join("\n")
     }
 }
 
-/// This trait is to be shared amongst all of the HTTP<verb>BodyStringBuilders, and has
+/// This trait is to be shared amongst all of the HTTP<verb>s, and has
 /// common util functions for them all so that unpacking calls work polymorphically
 pub trait RocketRouteBuilder {
     /// Dummy constructor for allowing trait usage

@@ -49,8 +49,7 @@ impl HeaderBuilder {
     fn get_misc_header_string() -> String {
         [
             "#![feature(proc_macro_hygiene, decl_macro)]",
-            "#[macro_use]",
-            "extern crate rocket;",
+            "use super::util;",
         ]
         .join("\n")
     }

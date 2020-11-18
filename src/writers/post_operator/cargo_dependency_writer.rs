@@ -3,25 +3,18 @@ use std::io::prelude::*;
 use std::path::PathBuf;
 
 fn get_cargo_dependency_string() -> String {
-    let dependencies = [
-        "tokio = { version = \"0.2\", features = [\"macros\", \"rt-threaded\"] }",
-        "warp = \"0.2\"",
+    [
+        // "tokio = { version = \"0.2\", features = [\"macros\", \"rt-threaded\"] }",
+        // "warp = \"0.2\"",
         "serde = {version = \"1.0\", features = [\"derive\"] }",
         "serde_derive = \"1.0\"",
-        "thiserror = \"1.0\"",
-        "chrono = { version = \"0.4\", features = [\"serde\"] }",
-        "futures = { version = \"0.3.4\", default-features = false, features = [\"async-await\"]}",
+        // "thiserror = \"1.0\"",
+        // "chrono = { version = \"0.4\", features = [\"serde\"] }",
+        // "futures = { version = \"0.3.4\", default-features = false, features = [\"async-await\"]}",
         "mongodb = \"1.0.0\"",
-        "actix-web = \"3\"",
-    ];
-
-    let mut output_string = String::new();
-
-    for dependency in &dependencies {
-        output_string.push_str(&format!("{}\n", dependency));
-    }
-
-    output_string
+        "rocket = \"0.4.6\"",
+    ]
+    .join("\n")
 }
 
 /// Writes the `[dependencies]` section of the generated toml file
