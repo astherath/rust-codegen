@@ -2,9 +2,9 @@ use clap::{App, Arg, SubCommand, crate_authors, crate_version};
 use crate::readers;
 use crate::writers;
 use crate::writers::dir_builder::DirectoryBuilder;
+use std::path::Path;
+use std::process::Command;
 
-//<cli-name> run <generated-output-folder-name>
-//<cli-name> build <generated-output-folder-name>
 pub fn parse_args() {
     let app_name = "apigen";
     let about = "Generates directories and skeletons for APIs from .toml input file";
@@ -19,16 +19,27 @@ pub fn parse_args() {
                     .help("The .toml file to read from")
                     .required(true)
                     .index(1)))
+        .subcommand(
+            SubCommand::with_name("run")
+                .about("Execute \"cargo run\" in target directory")
+                .arg(Arg::with_name("path")
+                    .help("The name of the folder in which to execute \"cargo run\"")
+                    .required(true)
+                    .index(1)))
         .get_matches();
 
     if let Some(matches) = matches.subcommand_matches("build") {
         let file = matches.value_of("file").unwrap();
         println!("Building {:?}", file);
-        build_api(file);
+        build_api(file).unwrap();
+    } else if let Some(matches) = matches.subcommand_matches("run") {
+        let path = matches.value_of("path").unwrap();
+        println!("Running {:?}", path);
+        run_api(path).unwrap();
     }
 }
 
-fn build_api(file: &str) {
+fn build_api(file: &str) -> std::io::Result<()>{
     // read in toml and print it (for debug)
     let filename = String::from(file);
     let toml_reader = readers::parser::InputFileReader::from_file(&filename);
@@ -49,5 +60,19 @@ fn build_api(file: &str) {
     writers::post_operator::do_post_write_ops(&String::from("./GENERATED")).unwrap();
 
     // nice little out message for now (pre-cli lol)
-    println!("Done, generated files are at {}.", &base_output_dir_str)
+    println!("Done, generated files are at {}.", &base_output_dir_str);
+    Ok(())
+}
+
+fn run_api(path_string: &str) -> std::io::Result<()> {
+    let path = Path::new(path_string);
+    let output = Command::new("cargo")
+        .args(&[
+            "run",
+            "--manifest-path",
+            path.join("Cargo.toml").to_str().unwrap(),
+        ])
+        .output()?;
+    println!("{}", String::from_utf8(output.stdout).unwrap());
+    Ok(())
 }
