@@ -5,11 +5,11 @@
 //! this code tries to hide as much of the actual interface it works with
 //! in order to simplify the top-level calls that the `file_writer` mod makes.
 
-mod actix_header_generator;
+mod api_header_generator;
 mod endpoint_generator;
 use crate::readers::assembler::Endpoint;
-use actix_header_generator::HeaderBuilder;
-use endpoint_generator::{ActixRouteBuilder, HttpGet};
+use api_header_generator::HeaderBuilder;
+use endpoint_generator::{new, HttpGet};
 
 /// Main output builder interface (HTTP added in front to avoid naming confusion)
 ///
@@ -31,7 +31,7 @@ impl HTTPGetEndpointBuilder {
         let mut full_endpoint_string = String::new();
 
         // the full method body string is next
-        let body_string_generator: HttpGet = ActixRouteBuilder::new(endpoint);
+        let body_string_generator: HttpGet = new::new(endpoint);
         let body_string = body_string_generator.get_body_string_from_endpoint();
         full_endpoint_string.push_str(&body_string);
 

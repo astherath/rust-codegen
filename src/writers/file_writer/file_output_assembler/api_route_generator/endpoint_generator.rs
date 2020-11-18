@@ -12,7 +12,7 @@ pub struct HttpGet {
     endpoint: Endpoint,
 }
 
-impl ActixRouteBuilder for HttpGet {
+impl RocketRouteBuilder for HttpGet {
     fn new(endpoint: &Endpoint) -> HttpGet {
         HttpGet {
             endpoint: endpoint.clone(),
@@ -74,7 +74,7 @@ impl ActixRouteBuilder for HttpGet {
 
 /// This trait is to be shared amongst all of the HTTP<verb>BodyStringBuilders, and has
 /// common util functions for them all so that unpacking calls work polymorphically
-pub trait ActixRouteBuilder {
+pub trait RocketRouteBuilder {
     /// Dummy constructor for allowing trait usage
     fn new(endpoint_ref: &Endpoint) -> Self;
 

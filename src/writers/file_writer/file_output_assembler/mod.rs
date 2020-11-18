@@ -1,4 +1,4 @@
-mod actix_route_generator;
+mod api_route_generator;
 mod main_method_generator;
 mod util_generator;
 
@@ -27,7 +27,7 @@ impl FileOutputAssembler {
 
         // the generator object has more than one call that we need, so it's
         // more efficient to build it now instead of making an abstract call
-        let route_generator = actix_route_generator::HTTPGetEndpointBuilder::new();
+        let route_generator = api_route_generator::HTTPGetEndpointBuilder::new();
 
         // append the import header string first
         full_output_string.push_str(&route_generator.get_header_import_string());
