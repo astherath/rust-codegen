@@ -18,7 +18,7 @@ impl MainMethodBuilder {
         let mut full_output_string = String::new();
 
         // import header string handling
-        full_output_string.push_str(&Self::get_main_method_import_string());
+        full_output_string.push_str(&Self::get_main_method_import_and_header_string());
 
         // method signature handling
         full_output_string.push_str(&Self::method_signature_string());
@@ -29,35 +29,32 @@ impl MainMethodBuilder {
         full_output_string
     }
 
-    /// Get static method string for `main`
-    fn get_main_method_import_string() -> String {
+    /// Get all of the imports and other misc. headers
+    fn get_main_method_import_and_header_string() -> String {
+        "\
+        #![feature(proc_macro_hygiene, decl_macro)]
+        mod users;
+
+        #[macro_use]
+        extern crate rocket;
         "
-            use tokio;
-            mod users;
-            "
         .to_string()
     }
 
-    /// Returns a string with the method signature that has the
-    /// `tokio async` macro header.
+    /// Returns a string with the method signature of the main method
     fn method_signature_string() -> String {
         "
-            #[tokio::main]
-            async fn main() {{
-            "
+        fn main() {
+        "
         .to_string()
     }
 
     /// Main method body string
     fn method_body_string() -> String {
         "
-            let db = users::util::DB::init().await.unwrap();
-            let col = db.get_collection();
-            let user_id = String::from(\"123\");
-            let user = users::util::find_user_by_id_util(user_id, col).await;
-            println!(\"{:#?}\", user);
-            }}
-            "
+        rocket::ignite().mount(\"/\", routes![users::index]).launch();
+        }
+        "
         .to_string()
     }
 }
