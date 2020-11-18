@@ -31,36 +31,33 @@ impl MainMethodBuilder {
 
     /// Get static method string for `main`
     fn get_main_method_import_string() -> String {
-        format!(
-            "
+        "
             use tokio;
             mod users;
             "
-        )
+        .to_string()
     }
 
     /// Returns a string with the method signature that has the
     /// `tokio async` macro header.
     fn method_signature_string() -> String {
-        format!(
-            "
+        "
             #[tokio::main]
             async fn main() {{
             "
-        )
+        .to_string()
     }
 
     /// Main method body string
     fn method_body_string() -> String {
-        format!(
-            "
+        "
             let db = users::util::DB::init().await.unwrap();
             let col = db.get_collection();
             let user_id = String::from(\"123\");
             let user = users::util::find_user_by_id_util(user_id, col).await;
-            println!(\"{{:#?}}\", user);
+            println!(\"{:#?}\", user);
             }}
             "
-        )
+        .to_string()
     }
 }

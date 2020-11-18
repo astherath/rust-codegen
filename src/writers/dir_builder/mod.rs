@@ -1,7 +1,7 @@
 // use crate::readers::assembler::WebAPI;
 use std::fs::{remove_dir_all, DirBuilder};
 use std::io::Result;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 /// Serves as a flag indicator for the (very limited) types of
@@ -18,8 +18,8 @@ pub enum SubDir {
 
 impl SubDir {
     /// Matches the incoming path string to an unwrappable enum
-    fn from_path_str(path_str: &String) -> Self {
-        match path_str.as_str() {
+    fn from_path_str(path_str: &str) -> Self {
+        match path_str {
             "routes" => Self::Routes,
             "util" => Self::Util,
             "models" => Self::Models,
@@ -56,7 +56,7 @@ pub struct DirectoryBuilder {
 impl DirectoryBuilder {
     /// Constructor that takes in the root output directory where all of the
     /// generated code will reside.
-    pub fn new(output_dir_str: &String, group_names: Vec<String>) -> DirectoryBuilder {
+    pub fn new(output_dir_str: &str, group_names: Vec<String>) -> DirectoryBuilder {
         // make the directory builder and allow recursive path building
         let mut dir_builder = DirBuilder::new();
         dir_builder.recursive(true);
@@ -104,7 +104,7 @@ impl DirectoryBuilder {
     pub fn create_base_dir(&self) -> Result<()> {
         // creating the base directory;
         // if an error occurs, hard wipes the directory and retries
-        if let Err(_) = self.dir_builder.create(&self.base_dir) {
+        if self.dir_builder.create(&self.base_dir).is_err() {
             remove_dir_all(&self.base_dir)?;
             self.dir_builder.create(&self.base_dir)?;
         }
@@ -115,7 +115,7 @@ impl DirectoryBuilder {
     ///
     /// Works off of a vector of `SubDir` structs, so adding/removing
     /// subdirs to the overall file hierarchy isn't a nightmare.
-    fn create_sub_directories(&mut self, sub_dirs: &Vec<String>) -> Result<()> {
+    fn create_sub_directories(&mut self, sub_dirs: &[String]) -> Result<()> {
         let mut full_dir = self.base_dir.clone();
 
         // add the group name to the dir to be created for each group
@@ -138,7 +138,17 @@ impl DirectoryBuilder {
     }
 
     /// Runs `cargo new` for the path to be generated
-    fn run_cargo_new(project_name: &String) {
-        Command::new("cargo new").args(&[project_name]);
+    fn run_cargo_new(project_name: &str) {
+        // check if the dir exists, if so, just return early
+        if Path::new(project_name).exists() {
+            return;
+        }
+        // make the directory first
+        DirBuilder::new().create(project_name).unwrap();
+
+        Command::new("cargo")
+            .args(&["init", project_name])
+            .output()
+            .unwrap();
     }
 }
