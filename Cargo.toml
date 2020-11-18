@@ -1,7 +1,7 @@
 [package]
 name = "rust-codegen"
 version = "0.1.0"
-authors = ["astherath <farceriv@gmail.com>"]
+authors = ["astherath <farceriv@gmail.com>", "liam0215 <liam0215@gmail.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -11,3 +11,4 @@ toml = "0.5"
 serde_derive = "1.0.117"
 serde = "1.0"
 # hyper = "0.13.9"
+clap = "~2.33.3"
