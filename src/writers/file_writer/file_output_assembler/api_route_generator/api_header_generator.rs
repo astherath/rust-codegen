@@ -50,6 +50,7 @@ impl HeaderBuilder {
         [
             "#![feature(proc_macro_hygiene, decl_macro)]",
             "use super::util;",
+            "use rocket::http::RawStr;",
         ]
         .join("\n")
     }

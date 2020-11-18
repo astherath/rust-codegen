@@ -52,7 +52,7 @@ impl MainMethodBuilder {
     /// Main method body string
     fn method_body_string() -> String {
         "
-        rocket::ignite().mount(\"/\", routes![users::index]).launch();
+        rocket::ignite().mount(\"/\", routes![users::routes::find_user_by_id]).launch();
         }
         "
         .to_string()

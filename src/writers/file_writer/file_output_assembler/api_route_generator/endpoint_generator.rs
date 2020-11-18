@@ -30,21 +30,43 @@ impl RocketRouteBuilder for HttpGet {
 
     fn macro_string(&self) -> String {
         let route = &self.endpoint.route;
-        format!("#[get(\"{}\")]", route)
+        let query_string = {
+            if let Some(query) = &self.endpoint.query_param {
+                format!("?<{}>", query.name)
+            } else {
+                "".to_string()
+            }
+        };
+        format!("#[get(\"{}{}\")]", route, &query_string)
     }
 
     fn method_signature_string(&self) -> String {
+        // FIXME: this exact if let gets re-written like 6 times with
+        //        slightly different return variations. Maybe employ a
+        //        class that handles query manips. independently?
+        //        in any case, this needs to be refactored because it smells.
+        let query_string = {
+            if let Some(query) = &self.endpoint.query_param {
+                format!("{}: {}", query.name, "&RawStr")
+            } else {
+                "".to_string()
+            }
+        };
         format!(
-            "fn {}() -> String {{",
-            &self.endpoint.name // &self.endpoint.name, &self.endpoint.return_model_name
+            "pub fn {}({}) -> String {{",
+            &self.endpoint.name,
+            query_string // &self.endpoint.name, &self.endpoint.return_model_name
         )
     }
 
     fn method_body_string(&self) -> String {
-        let mut param_string = String::new();
-        if let Some(query) = &self.endpoint.query_param {
-            param_string.push_str(&format!("{}, ", query.name));
-        }
+        let param_string = {
+            if let Some(query) = &self.endpoint.query_param {
+                format!("{}.to_string()", query.name)
+            } else {
+                "".to_string()
+            }
+        };
 
         let util_method_call = format!(
             "let response = util::{}_util({});",
