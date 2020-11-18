@@ -1,4 +1,4 @@
-//! Writes a single functions - `main`. Has the code to run the async actix function.
+//! Writes a single functions - `main`. Has the code to run the async rocket function.
 
 /// Only public interface for the `mod` that returns the
 /// finished string output.

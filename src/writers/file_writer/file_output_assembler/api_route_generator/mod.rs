@@ -1,5 +1,5 @@
 //! Serves as the abstract string-building interface for
-//! writing `arctix` GET endpoint code to file.
+//! writing `rocket` GET endpoint code to file.
 //!
 //! Due to the nature of raw string manipulation/output building,
 //! this code tries to hide as much of the actual interface it works with
@@ -9,7 +9,7 @@ mod api_header_generator;
 mod endpoint_generator;
 use crate::readers::assembler::Endpoint;
 use api_header_generator::HeaderBuilder;
-use endpoint_generator::{new, HttpGet};
+use endpoint_generator::{HttpGet, RocketRouteBuilder};
 
 /// Main output builder interface (HTTP added in front to avoid naming confusion)
 ///
@@ -31,7 +31,7 @@ impl HTTPGetEndpointBuilder {
         let mut full_endpoint_string = String::new();
 
         // the full method body string is next
-        let body_string_generator: HttpGet = new::new(endpoint);
+        let body_string_generator: HttpGet = RocketRouteBuilder::new(endpoint);
         let body_string = body_string_generator.get_body_string_from_endpoint();
         full_endpoint_string.push_str(&body_string);
 
