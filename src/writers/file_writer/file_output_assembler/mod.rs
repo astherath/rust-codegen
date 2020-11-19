@@ -1,5 +1,5 @@
-mod actix_route_generator;
-mod main_method_generator;
+mod api_route_generator;
+pub mod main_method_generator;
 mod util_generator;
 
 use crate::readers::assembler::{EndpointGroup, WebAPI};
@@ -27,7 +27,7 @@ impl FileOutputAssembler {
 
         // the generator object has more than one call that we need, so it's
         // more efficient to build it now instead of making an abstract call
-        let route_generator = actix_route_generator::HTTPGetEndpointBuilder::new();
+        let route_generator = api_route_generator::HTTPGetEndpointBuilder::new();
 
         // append the import header string first
         full_output_string.push_str(&route_generator.get_header_import_string());
@@ -39,11 +39,6 @@ impl FileOutputAssembler {
         }
 
         full_output_string
-    }
-
-    /// `main.rs` method output generator interface
-    pub fn get_main_method_string() -> String {
-        main_method_generator::get_main_method_string()
     }
 
     /// Util method generator interface. Requires extra data for the database

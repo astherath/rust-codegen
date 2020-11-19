@@ -35,7 +35,7 @@ pub fn get_database_setup_string(db_info: &DatabaseInfo) -> String {
 pub fn get_database_import_string() -> String {
     String::from(
         "\
-        use mongodb::bson::{doc, from_bson, Bson};
+        use mongodb::bson::{doc};
         use mongodb::{error::Error, Client, Collection};
         ",
     )

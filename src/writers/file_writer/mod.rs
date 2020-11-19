@@ -5,15 +5,14 @@ use std::path::PathBuf;
 mod file_output_assembler;
 use crate::readers::assembler::{EndpointGroup, WebAPI};
 use crate::writers::dir_builder::{DirectoryBuilder, SubDir};
-use file_output_assembler::FileOutputAssembler;
+use file_output_assembler::{main_method_generator::MainMethodBuilder, FileOutputAssembler};
 
 pub fn write(api_config: &WebAPI, dir_builder: DirectoryBuilder) -> std::io::Result<()> {
     let root_dir = dir_builder.base_dir;
     let mut file_writer = FileWriter::from_base_dir(root_dir);
 
     // write the main file (outside of group)
-    let main_method_string = FileOutputAssembler::get_main_method_string();
-    file_writer.write_main_function(main_method_string).unwrap();
+    let mut main_method_string_builder = MainMethodBuilder::new();
 
     // write to file
     for group in &api_config.groups {
@@ -31,9 +30,17 @@ pub fn write(api_config: &WebAPI, dir_builder: DirectoryBuilder) -> std::io::Res
         let actix_route_method_string = output_assembler.get_actix_routes_string();
         file_writer.write_output_to_file(&SubDir::Routes, actix_route_method_string)?;
 
+        // add the group data to writer so the main function can mount the routes
+        main_method_string_builder.mount_group(group);
+
         // finally write the mod file for the group
         file_writer.write_mod_rs_to_file().unwrap();
     }
+
+    // write fully assembled main file
+    let main_function_string = main_method_string_builder.get_main_method_string();
+    file_writer.write_main_function(main_function_string)?;
+
     Ok(())
 }
 
@@ -82,13 +89,13 @@ impl FileWriter {
         let filename = String::from("main.rs");
 
         // add file to base path
-        self.group_base_dir.push(filename);
+        self.base_dir.push(filename);
 
         // open file and write `content` to it
-        let mut file = File::create(&self.group_base_dir)?;
+        let mut file = File::create(&self.base_dir)?;
         file.write_all(content.as_bytes())?;
 
-        self.group_base_dir.pop();
+        self.base_dir.pop();
 
         Ok(())
     }

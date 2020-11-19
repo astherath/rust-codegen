@@ -12,7 +12,7 @@ pub struct HttpGet {
     endpoint: Endpoint,
 }
 
-impl ActixRouteBuilder for HttpGet {
+impl RocketRouteBuilder for HttpGet {
     fn new(endpoint: &Endpoint) -> HttpGet {
         HttpGet {
             endpoint: endpoint.clone(),
@@ -20,61 +20,67 @@ impl ActixRouteBuilder for HttpGet {
     }
 
     fn get_body_string_from_endpoint(&self) -> String {
-        let mut full_output_string = String::new();
-
-        // macro header handling
-        full_output_string.push_str(&self.macro_string());
-
-        // method signature handling
-        full_output_string.push_str(&self.method_signature_string());
-
-        // method body handling
-        full_output_string.push_str(&self.method_body_string());
-
-        full_output_string
+        [
+            self.macro_string(),
+            self.method_signature_string(),
+            self.method_body_string(),
+        ]
+        .join("\n")
     }
 
     fn macro_string(&self) -> String {
         let route = &self.endpoint.route;
-        format!("#[get(\"{}\")]\n", route)
+        let query_string = {
+            if let Some(query) = &self.endpoint.query_param {
+                format!("?<{}>", query.name)
+            } else {
+                "".to_string()
+            }
+        };
+        format!("#[get(\"{}{}\")]", route, &query_string)
     }
 
     fn method_signature_string(&self) -> String {
-        let mut param_string = String::new();
-
-        if let Some(query) = &self.endpoint.query_param {
-            param_string.push_str(&format!("{}: {}, ", query.name, query.field_type));
-        }
-
-        let fn_name = &self.endpoint.name;
+        // FIXME: this exact if let gets re-written like 6 times with
+        //        slightly different return variations. Maybe employ a
+        //        class that handles query manips. independently?
+        //        in any case, this needs to be refactored because it smells.
+        let query_string = {
+            if let Some(query) = &self.endpoint.query_param {
+                format!("{}: {}", query.name, "&RawStr")
+            } else {
+                "".to_string()
+            }
+        };
         format!(
-            "async fn {}({}data: web::Data<util::DB>) -> impl Responder {{\n",
-            fn_name, param_string
+            "pub fn {}({}) -> String {{",
+            &self.endpoint.name,
+            query_string // &self.endpoint.name, &self.endpoint.return_model_name
         )
     }
 
     fn method_body_string(&self) -> String {
-        // setup and create the util method handler
-        let mut param_string = String::new();
-        if let Some(query) = &self.endpoint.query_param {
-            param_string.push_str(&format!("{}, ", query.name));
-        }
-        let util_method = format!(
-            "
-            let collection = data.get_collection();
-            let response = util::{}_util({}collection).await;",
+        let param_string = {
+            if let Some(query) = &self.endpoint.query_param {
+                format!("{}.to_string()", query.name)
+            } else {
+                "".to_string()
+            }
+        };
+
+        let util_method_call = format!(
+            "let response = util::{}_util({});",
             &self.endpoint.name, param_string
         );
+        let return_statement = "response}".to_string();
 
-        let http_response = String::from("HttpResponse::Ok().json(response)}");
-
-        format!("{}\n{}", util_method, http_response)
+        [util_method_call, return_statement].join("\n")
     }
 }
 
-/// This trait is to be shared amongst all of the HTTP<verb>BodyStringBuilders, and has
+/// This trait is to be shared amongst all of the HTTP<verb>s, and has
 /// common util functions for them all so that unpacking calls work polymorphically
-pub trait ActixRouteBuilder {
+pub trait RocketRouteBuilder {
     /// Dummy constructor for allowing trait usage
     fn new(endpoint_ref: &Endpoint) -> Self;
 
