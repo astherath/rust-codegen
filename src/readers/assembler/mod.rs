@@ -115,7 +115,7 @@ pub struct Endpoint {
 impl Endpoint {
     /// Returns the formatted name of the method for the endpoint
     fn get_method_name(&self) -> String {
-        format!("{}", &self.name)
+        &self.name.to_string()
     }
 }
 
