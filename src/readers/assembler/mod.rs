@@ -79,6 +79,18 @@ impl EndpointGroup {
         }
         all_endpoints
     }
+
+    /// Returns a list of all of the method names for the group
+    pub fn get_util_method_names(&self) -> Vec<String> {
+        let endpoints = self.get_endpoints();
+        let mut method_names = Vec::new();
+        for endpoint in &endpoints {
+            let method_name = format!("{}::routes::{}", &self.name, &endpoint.get_method_name());
+            method_names.push(method_name);
+        }
+
+        method_names
+    }
 }
 
 /// Single-endpoint struct. Holds info such as type, route, input data, etc.
@@ -98,6 +110,13 @@ pub struct Endpoint {
     pub success_code: u16,
     pub return_model_name: String,
     pub return_model: String,
+}
+
+impl Endpoint {
+    /// Returns the formatted name of the method for the endpoint
+    fn get_method_name(&self) -> String {
+        format!("{}", &self.name)
+    }
 }
 
 /// Made for requests (`GET`s) that need to take in a URL query string parameter.

@@ -23,20 +23,12 @@ impl UtilEndpointBuilder {
         // setting up the util builder
         let endpoint = endpoint_ref.clone();
         let util_builder = UtilEndpointBuilder { endpoint };
-
-        // output string-to-be
-        let mut full_output_string = String::new();
-
-        // response model struct handling
-        full_output_string.push_str(&util_builder.method_return_struct_string());
-
-        // method signature handling
-        full_output_string.push_str(&util_builder.method_signature_string());
-
-        // method body handling
-        full_output_string.push_str(&util_builder.method_body_string());
-
-        full_output_string
+        [
+            util_builder.method_return_struct_string(),
+            util_builder.method_signature_string(),
+            util_builder.method_body_string(),
+        ]
+        .join("\n")
     }
 
     /// Returns a string with the method signature that matches the one used
@@ -45,14 +37,11 @@ impl UtilEndpointBuilder {
         // create the string of params (if none given, 0 len string)
         let mut param_string = String::new();
         if let Some(query) = &self.endpoint.query_param {
-            // param_string.push_str(&format!("{}: {}, ", query.name, query.field_type));
             param_string.push_str(&format!("{}: {}", query.name, query.field_type));
         }
 
         // final output string
         format!(
-            // "pub fn {}_util({}collection: Collection) -> {} {{\n",
-            // "pub fn {}_util({}) -> {} {{\n",
             "pub fn {}_util({}) -> String {{\n",
             &self.endpoint.name, param_string
         )

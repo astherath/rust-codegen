@@ -16,7 +16,7 @@ impl HeaderBuilder {
     /// Top-level function for the struct that returns the final,
     /// assembled header string from endpoint data.
     pub fn get_header_string() -> String {
-        [Self::get_import_string(), Self::get_misc_header_string()].join("\n")
+        [Self::get_misc_header_string(), Self::get_import_string()].join("\n")
     }
 
     /// Handles the string literals that have the imports.

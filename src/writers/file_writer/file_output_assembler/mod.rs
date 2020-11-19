@@ -1,5 +1,5 @@
 mod api_route_generator;
-mod main_method_generator;
+pub mod main_method_generator;
 mod util_generator;
 
 use crate::readers::assembler::{EndpointGroup, WebAPI};
@@ -39,11 +39,6 @@ impl FileOutputAssembler {
         }
 
         full_output_string
-    }
-
-    /// `main.rs` method output generator interface
-    pub fn get_main_method_string() -> String {
-        main_method_generator::get_main_method_string()
     }
 
     /// Util method generator interface. Requires extra data for the database
