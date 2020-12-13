@@ -45,7 +45,7 @@ fn build_api(file: &str) -> std::io::Result<()>{
     let toml_reader = readers::parser::InputFileReader::from_file(&filename);
 
     // make the sub directories with a DirectoryBuilder
-    let base_output_dir_str: String = toml_reader.toml_data.path_base.to_owned();
+    let base_output_dir_str: String = toml_reader.toml_data.path_base.clone();
 
     // each group will get a subdirectory so we need the names now
     let group_names = toml_reader.toml_data.get_group_names();
@@ -57,7 +57,7 @@ fn build_api(file: &str) -> std::io::Result<()>{
     writers::file_writer::write(&toml_reader.toml_data, dir_builder).unwrap();
 
     // format all .rs files in generated directory
-    let path = String::from("./").to_owned() + &base_output_dir_str;
+    let path = String::from("./") + &base_output_dir_str;
     writers::post_operator::do_post_write_ops(&path).unwrap();
 
     // nice little out message for now (pre-cli lol)
@@ -70,7 +70,7 @@ fn run_api(file: &str) -> std::io::Result<()> {
     let filename = String::from(file);
     let toml_reader = readers::parser::InputFileReader::from_file(&filename);
     let base_output_dir_str: String = toml_reader.toml_data.path_base.to_owned();
-    let path_string = String::from("./").to_owned() + &base_output_dir_str;
+    let path_string = String::from("./") + &base_output_dir_str;
     let path = Path::new(&path_string);
 
     // cargo run in path
