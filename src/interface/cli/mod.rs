@@ -14,34 +14,33 @@ pub fn parse_args() {
         .subcommand(
             SubCommand::with_name("build")
                 .about("Generate directory and associated files from .toml")
-                .arg(Arg::with_name("file")
+                .arg(Arg::with_name("filename")
                     .help("The .toml file to read from")
                     .required(true)
                     .index(1)))
         .subcommand(
             SubCommand::with_name("run")
                 .about("Execute \"cargo run\" in directory specified in .toml file")
-                .arg(Arg::with_name("file")
+                .arg(Arg::with_name("filename")
                     .help("The .toml file containing the path in which to execute \"cargo run\"")
                     .required(true)
                     .index(1)))
         .get_matches();
 
     if let Some(matches) = matches.subcommand_matches("build") {
-        let file = matches.value_of("file").unwrap();
+        let file = matches.value_of("filename").unwrap();
         println!("Building {:?}", file);
         build_api(file).unwrap();
     } else if let Some(matches) = matches.subcommand_matches("run") {
-        let file = matches.value_of("file").unwrap();
+        let file = matches.value_of("filename").unwrap();
         println!("Running {:?}", file);
         run_api(file).unwrap();
     }
 }
 
-fn build_api(file: &str) -> std::io::Result<()>{
+fn build_api(file_name: &str) -> std::io::Result<()>{
     // read in toml and print it (for debug)
-    let filename = String::from(file);
-    let toml_reader = readers::parser::InputFileReader::from_file(&filename);
+    let toml_reader = readers::parser::InputFileReader::from_file(file_name);
 
     // make the sub directories with a DirectoryBuilder
     let base_output_dir_str: String = toml_reader.toml_data.path_base.clone();
@@ -64,9 +63,9 @@ fn build_api(file: &str) -> std::io::Result<()>{
     Ok(())
 }
 
-fn run_api(filename: &str) -> std::io::Result<()> {
+fn run_api(file_name: &str) -> std::io::Result<()> {
     // read in output dir from toml
-    let toml_reader = readers::parser::InputFileReader::from_file(&filename);
+    let toml_reader = readers::parser::InputFileReader::from_file(file_name);
     let base_output_dir_str: String = toml_reader.toml_data.path_base;
     let path_string = String::from("./") + &base_output_dir_str;
     let path = Path::new(&path_string);
