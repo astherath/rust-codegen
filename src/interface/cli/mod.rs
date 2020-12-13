@@ -69,7 +69,7 @@ fn run_api(file: &str) -> std::io::Result<()> {
     // read in output dir from toml
     let filename = String::from(file);
     let toml_reader = readers::parser::InputFileReader::from_file(&filename);
-    let base_output_dir_str: String = toml_reader.toml_data.path_base.to_owned();
+    let base_output_dir_str: String = toml_reader.toml_data.path_base;
     let path_string = String::from("./") + &base_output_dir_str;
     let path = Path::new(&path_string);
 
