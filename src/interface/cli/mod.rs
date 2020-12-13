@@ -1,7 +1,6 @@
 use clap::{App, Arg, SubCommand, crate_authors, crate_version};
 use crate::readers;
-use crate::writers;
-use crate::writers::dir_builder::DirectoryBuilder;
+use crate::writers::{self, dir_builder::DirectoryBuilder};
 use std::path::Path;
 use std::process::Command;
 
@@ -49,7 +48,6 @@ fn build_api(file: &str) -> std::io::Result<()>{
 
     // each group will get a subdirectory so we need the names now
     let group_names = toml_reader.toml_data.get_group_names();
-    // let mut dir_builder = DirectoryBuilder::new(base_output_dir_str.clone(), group_names);
     let mut dir_builder = DirectoryBuilder::new(&base_output_dir_str, group_names);
     dir_builder.build().unwrap();
 
@@ -57,7 +55,8 @@ fn build_api(file: &str) -> std::io::Result<()>{
     writers::file_writer::write(&toml_reader.toml_data, dir_builder).unwrap();
 
     // format all .rs files in generated directory
-    let path = String::from("./") + &base_output_dir_str;
+    let path_string = String::from("./") + &base_output_dir_str;
+    let path = Path::new(&path_string);
     writers::post_operator::do_post_write_ops(&path).unwrap();
 
     // nice little out message for now (pre-cli lol)
@@ -65,9 +64,8 @@ fn build_api(file: &str) -> std::io::Result<()>{
     Ok(())
 }
 
-fn run_api(file: &str) -> std::io::Result<()> {
+fn run_api(filename: &str) -> std::io::Result<()> {
     // read in output dir from toml
-    let filename = String::from(file);
     let toml_reader = readers::parser::InputFileReader::from_file(&filename);
     let base_output_dir_str: String = toml_reader.toml_data.path_base;
     let path_string = String::from("./") + &base_output_dir_str;
