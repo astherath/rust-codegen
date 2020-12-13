@@ -22,6 +22,7 @@ use std::fmt;
 pub struct WebAPI {
     title: String,
     version: String,
+    pub path_base: String,
     pub db_uri: String,
     pub db_name: String,
     pub groups: Vec<EndpointGroup>,

@@ -21,9 +21,9 @@ pub fn parse_args() {
                     .index(1)))
         .subcommand(
             SubCommand::with_name("run")
-                .about("Execute \"cargo run\" in target directory")
-                .arg(Arg::with_name("path")
-                    .help("The name of the folder in which to execute \"cargo run\"")
+                .about("Execute \"cargo run\" in directory specified in .toml file")
+                .arg(Arg::with_name("file")
+                    .help("The .toml file containing the path in which to execute \"cargo run\"")
                     .required(true)
                     .index(1)))
         .get_matches();
@@ -45,7 +45,7 @@ fn build_api(file: &str) -> std::io::Result<()>{
     let toml_reader = readers::parser::InputFileReader::from_file(&filename);
 
     // make the sub directories with a DirectoryBuilder
-    let base_output_dir_str = String::from("GENERATED");
+    let base_output_dir_str: String = toml_reader.toml_data.path_base.to_owned();
 
     // each group will get a subdirectory so we need the names now
     let group_names = toml_reader.toml_data.get_group_names();
@@ -57,7 +57,8 @@ fn build_api(file: &str) -> std::io::Result<()>{
     writers::file_writer::write(&toml_reader.toml_data, dir_builder).unwrap();
 
     // format all .rs files in generated directory
-    writers::post_operator::do_post_write_ops(&String::from("./GENERATED")).unwrap();
+    let path = String::from("./").to_owned() + &base_output_dir_str;
+    writers::post_operator::do_post_write_ops(&path).unwrap();
 
     // nice little out message for now (pre-cli lol)
     println!("Done, generated files are at {}.", &base_output_dir_str);
