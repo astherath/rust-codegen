@@ -33,9 +33,9 @@ pub fn parse_args() {
         println!("Building {:?}", file);
         build_api(file).unwrap();
     } else if let Some(matches) = matches.subcommand_matches("run") {
-        let path = matches.value_of("path").unwrap();
-        println!("Running {:?}", path);
-        run_api(path).unwrap();
+        let file = matches.value_of("file").unwrap();
+        println!("Running {:?}", file);
+        run_api(file).unwrap();
     }
 }
 
@@ -65,8 +65,15 @@ fn build_api(file: &str) -> std::io::Result<()>{
     Ok(())
 }
 
-fn run_api(path_string: &str) -> std::io::Result<()> {
-    let path = Path::new(path_string);
+fn run_api(file: &str) -> std::io::Result<()> {
+    // read in output dir from toml
+    let filename = String::from(file);
+    let toml_reader = readers::parser::InputFileReader::from_file(&filename);
+    let base_output_dir_str: String = toml_reader.toml_data.path_base.to_owned();
+    let path_string = String::from("./").to_owned() + &base_output_dir_str;
+    let path = Path::new(&path_string);
+
+    // cargo run in path
     let output = Command::new("cargo")
         .args(&[
             "run",
