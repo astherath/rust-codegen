@@ -1,5 +1,6 @@
 title = "API Title"
 version = "V0.1"
+path_base = "GENERATED"
 db_uri = "mongodb://127.0.0.1:27017/"
 db_name = "tests"
 
